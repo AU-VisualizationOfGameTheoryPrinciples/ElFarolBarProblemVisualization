@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Santa Fe Bar Problem!</title>
+    
+    <link rel="stylesheet" href="stylesheet.css">
+    <script src="./calcUtility.js"></script>
+</head>
+
+<body>
+    <h1 class="title">🍺 The El Farol Bar Problem! 🍹</h1>
+    <div id="main">
+        <form id="form" method="get" action="">
+            <div class="form">
+                <div class="settings">
+                    <label for="people_count">Maximum amount of people:</label>
+                    <input type="number" id="people_count" name="people_count">
+                    <label for="capacity">Capacity of the bar:</label>
+                    <input type="number" id="capacity" name="capacity">
+                    <label for="probability">Probability of going to the bar (in percent):</label>
+                    <input type="number" id="probability" name="probability">
+                    <label for="days">Following Days (Iterations)</label>
+                    <input type="number" id="days" name="days">
+                </div>
+                <div class="util">
+                    <short class="util-label">Utility</short>
+                    <label for="home_util">Staying at home</label>
+                    <input type="number" id="home_util" name="home_util" value="0">
+                    <label for="uncrowded_util">Bar is uncrowded</label>
+                    <input type="number" id="uncrowded_util" name="uncrowded_util" value="1">
+                    <label for="crowded_util">Bar is crowded</label>
+                    <input type="number" id="crowded_util" name="crowded_util" value="-1">
+                </div>
+            </div>
+            <input class="submit-button" type="submit" value="Submit">
+        </form>
+        <table id="results">
+            <tr id="captions">
+                <th id="N">N</th>
+                <th id="c">c</th>
+                <th id="p">p</th>
+                <th id="bar">At the bar</th>
+                <th id="util">Collected Utility</th>
+            </tr>
+            <!-- <div id="values"> -->
+            <!-- <short class="N_value"></short>
+                <short class="c_value"></short>
+                <short class="p_value"></short>
+                <short class="bar_value"></short>
+                <short class="util_value"></short> -->
+            <!-- </div> -->
+
+    </div>
+    </div>
+</body>
+</html>

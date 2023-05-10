@@ -1,0 +1,120 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#main {
+    display: flex;
+    flex-direction: column;
+    row-gap: 5px;
+}
+
+#form {
+    display: flex;
+    flex-direction: column;
+    margin: 0% 3%;
+    align-items: center;
+}
+
+.form {
+    display: grid;
+    /* align-items: center; */
+    row-gap: 10px;
+    column-gap: 80px;
+}
+
+#results {
+    /* display: grid;
+    column-gap: 10px;
+    row-gap: 10px; */
+    border-collapse: collapse;
+    /* width: 100%; */
+    margin: 5%;
+}
+
+td,
+th {
+    border: 1px solid #000000;
+    text-align: left;
+    padding: 8px;
+    width: 10%;
+    text-align: center;
+}
+
+.title{
+    text-align: center;
+    font-family: 'Brush Script', Georgia, 'Times New Roman', Times, serif;
+    padding: 2%;
+}
+
+.settings, .util{
+    display: grid;
+    grid-template-columns: auto 40%;
+}
+
+.settings{
+    grid-column: 1;
+    column-gap: 10px;
+}
+
+.settings label{
+    width: max-content;
+}
+
+.util-label{
+    grid-column: 2;
+    width: auto;
+    text-align: center;
+    border: 1px solid #000000;
+    padding: 2%;
+    font-weight: bold;
+}
+
+.util{
+    grid-column: 2;
+    border-collapse: collapse;
+    padding: 1%;
+}
+
+.util label{
+    font-weight: bold;
+    width: 100%;
+}
+.util input{
+    text-align: center;
+}
+
+.util label, .util input{
+    border: 1px solid #000000;
+    padding: 2%;
+}
+
+.submit-button{
+    margin: 2%;
+    font-size: medium;
+    width: 10%;
+    padding: 1%;
+}
+
+/* #captions {
+    grid-row: 1;
+} */
+
+/* #N, .N_value {
+    grid-column: 1;
+}
+
+#c, .c_value {
+    grid-column: 2;
+}
+
+#p, .p_value {
+    grid-column: 3;
+}
+
+#bar, .bar_value {
+    grid-column: 4;
+}
+
+#util, .util_value {
+    grid-column: 5;
+} */
