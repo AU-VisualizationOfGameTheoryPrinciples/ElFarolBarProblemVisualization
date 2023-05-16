@@ -1,13 +1,39 @@
 window.onload = init;
 
+var formerUtility;
+var iterations;
+var countGoodDays = 0;
+var countBadDays = 0;
+
 function init() {
-    // document.getElementById("form").onsubmit = calcUtility;
-    var days = get("days");
-    var iterations = days > 0 ? days : 1;
-    for (let i = 0; i < iterations; i++) {
-        calcUtility();
+    
+    // Initial start
+    if(window.location.search.substring(0,1) == ""){
+        document.getElementById("results").style.display = "none";
+        return;
     }
+    
+    var days = get("days");
+    iterations = days > 0 ? days : 1;
+    for (let i = 0; i < iterations; i++) {
+        formerUtility = calcUtility();
+        if(formerUtility>0){
+            countGoodDays++;
+        } else if (formerUtility<0){
+            countBadDays++;
+        }
+    }
+
+    showSummary();
+
     console.log("Initialized!")
+}
+
+function showSummary() {
+    var summary_elem = document.getElementById("days_summary");
+    var summary_text = document.createElement("p");
+    summary_text.innerText = countGoodDays + " good days and " + countBadDays + " bad days out of " + iterations + " days watched (" + Number.parseInt(countGoodDays/iterations*100) + "%).";
+    summary_elem.append(summary_text);
 }
 
 function getEntries() {
@@ -37,7 +63,16 @@ function setValueById(id, value){
 }
 
 function checkIfDefaultValue(elem, defaultValue){
-    elem = elem ? elem : defaultValue;
+    elem = Number.parseInt(elem);
+    return Number.isInteger(elem) ? elem : defaultValue;
+}
+
+function adaptProbability(prob){
+    if(formerUtility == undefined || formerUtility > 0){
+        return prob;
+    } else {
+        return prob / 2;
+    }
 }
 
 function calcUtility() {
@@ -49,10 +84,11 @@ function calcUtility() {
     var home_util = get("home_util");
     var uncrowded_util = get("uncrowded_util");
     var crowded_util = get("crowded_util");
+    var adapts = get("adapts");
 
-    checkIfDefaultValue(home_util, 0);
-    checkIfDefaultValue(uncrowded_util, 1);
-    checkIfDefaultValue(crowded_util,-1);
+    home_util = checkIfDefaultValue(home_util, 0);
+    uncrowded_util = checkIfDefaultValue(uncrowded_util, 1);
+    crowded_util = checkIfDefaultValue(crowded_util,-1);
 
     setValueById("people_count", people_count);
     setValueById("capacity", capacity);
@@ -67,6 +103,11 @@ function calcUtility() {
     if (validate() == true) {
         var bar_filled = 0;
         probability = probability / 100;
+
+        if(adapts == "true"){
+            probability = adaptProbability(probability);
+            document.querySelector("#adapts").checked = true;
+        }
 
         for (let i = 0; i < people_count; i++) {
             var rand = Math.random();
@@ -93,9 +134,15 @@ function calcUtility() {
         addValue("td", "c_value", capacity, row);
         addValue("td", "p_value", probability, row);
         addValue("td", "bar_value", bar_filled, row);
-        addValue("td", "util_value", result, row);
+        var util = addValue("td", "util_value", result, row);
+
+        if(result<0){
+            util.setAttribute("class", "bad_util");
+        }
 
         document.getElementById("results").append(row);
+
+        return result;
     }
     else {
         document.getElementById("results").style.display = "none";
@@ -128,4 +175,5 @@ function addValue(elementName, className, value, row) {
     elem.setAttribute("class", className);
     elem.append(value);
     row.append(elem);
+    return elem;
 }

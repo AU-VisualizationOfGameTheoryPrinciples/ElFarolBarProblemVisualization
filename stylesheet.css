@@ -40,27 +40,28 @@ th {
     text-align: center;
 }
 
-.title{
+.title {
     text-align: center;
     font-family: 'Brush Script', Georgia, 'Times New Roman', Times, serif;
     padding: 2%;
 }
 
-.settings, .util{
+.settings,
+.util {
     display: grid;
     grid-template-columns: auto 40%;
 }
 
-.settings{
+.settings {
     grid-column: 1;
     column-gap: 10px;
 }
 
-.settings label{
+.settings label {
     width: max-content;
 }
 
-.util-label{
+.util-label {
     grid-column: 2;
     width: auto;
     text-align: center;
@@ -69,30 +70,40 @@ th {
     font-weight: bold;
 }
 
-.util{
+.util {
     grid-column: 2;
     border-collapse: collapse;
     padding: 1%;
 }
 
-.util label{
+.util label {
     font-weight: bold;
     width: 100%;
 }
-.util input{
+
+.util input {
     text-align: center;
 }
 
-.util label, .util input{
+.util label,
+.util input {
     border: 1px solid #000000;
     padding: 2%;
 }
 
-.submit-button{
+.submit-button {
     margin: 2%;
     font-size: medium;
     width: 10%;
     padding: 1%;
+}
+
+.bad_util {
+    background-color: #fc4343;
+}
+
+#days_summary {
+    text-align: center;
 }
 
 /* #captions {

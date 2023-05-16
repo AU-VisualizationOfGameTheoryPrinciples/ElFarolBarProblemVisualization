@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Santa Fe Bar Problem!</title>
-    
+
     <link rel="stylesheet" href="stylesheet.css">
     <script src="./calcUtility.js"></script>
 </head>
@@ -23,8 +23,10 @@
                     <input type="number" id="capacity" name="capacity">
                     <label for="probability">Probability of going to the bar (in percent):</label>
                     <input type="number" id="probability" name="probability">
-                    <label for="days">Following Days (Iterations)</label>
+                    <label for="days">Following Days (Iterations):</label>
                     <input type="number" id="days" name="days">
+                    <label for="adapts">Adapting on previous day's result?:</label>
+                    <input type="checkbox" id="adapts" name="adapts" value="true">
                 </div>
                 <div class="util">
                     <short class="util-label">Utility</short>
@@ -38,6 +40,7 @@
             </div>
             <input class="submit-button" type="submit" value="Submit">
         </form>
+        <div id="days_summary"></div>
         <table id="results">
             <tr id="captions">
                 <th id="N">N</th>
@@ -53,8 +56,9 @@
                 <short class="bar_value"></short>
                 <short class="util_value"></short> -->
             <!-- </div> -->
-
+        </table>
     </div>
     </div>
 </body>
+
 </html>
