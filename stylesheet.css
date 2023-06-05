@@ -116,6 +116,10 @@ th {
     text-align: center;
 }
 
+.introduction {
+    padding: 0.1rem 0.3rem;
+}
+
 /* #captions {
     grid-row: 1;
 } */
