@@ -1,5 +1,6 @@
 body {
     font-family: Arial, Helvetica, sans-serif;
+    background-color: #fdd4d40c;
 }
 
 #main {
@@ -22,11 +23,32 @@ body {
     row-gap: 30px;
 }
 
+.logo {
+    position: absolute;
+    max-width: 10%;
+    min-width: 2em;
+    max-height: 10%;
+    min-height: 1em;
+    display: none;
+    top: 6em;
+    left: 1em;
+    /* background-color: #ec0707;
+    padding: 1%;
+    border: 4px solid #2a0303;
+    box-shadow: 2px 2px #59000060; */
+}
+
 @media (min-width: 820px) {
-    .form{
+    .form {
         flex-direction: row;
         row-gap: 10px;
         column-gap: 80px;
+    }
+
+    .logo {
+        display: block;
+        top: 0.8em;
+        left: 1em;
     }
 }
 
@@ -50,8 +72,15 @@ th {
 
 .title {
     text-align: center;
-    font-family: 'Brush Script', Georgia, 'Times New Roman', Times, serif;
-    padding: 2%;
+    color: #290000;
+    font-family: 'Beth Ellen', 'Brush Script', Georgia, 'Times New Roman', Times, serif;
+    padding: 0.5em 0.5em;
+    margin-bottom: 1.5em;
+    margin-top: -0.5em;
+    margin-left: -0.5em;
+    margin-right: -0.5em;
+    background-color: #ac2828;
+    border-bottom: 5px solid #2a0303;
 }
 
 .settings,
