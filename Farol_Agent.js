@@ -12,6 +12,14 @@ attendance_history.fill(0);
 var current_week;
 var agents = new Array(AMOUNT_OF_PEOPLE);
 
+var canvas = document.getElementById("attendance_graph");
+var ctx = canvas.getContext("2d");
+ctx.beginPath();
+ctx.moveTo(0, 10);
+ctx.lineTo(300, 10);
+ctx.stroke();
+// ctx.fillStyle = "#000000";
+
 class Farol_Agent {
     id;
     memory_size;
@@ -165,15 +173,56 @@ console.log("score:" + testAgent.score);
 // }
 
 for (let i = 0; i < TOTAL_WEEKS; i++) {
+    // console.log("-- predict: " + testAgent.predict_attendance(i, attendance_history));
+    testAgent.decide_attending(i, attendance_history);
+    // if(i != 0)
     attendance_history[i] = generateRandomAttendance();
     console.log("ah" + i + ": " + attendance_history[i]);
+
+    manageOvercrowded(i);
 
     testAgent.rank_strategies(i, attendance_history);
     testAgent.strategies_set.print();
 }
 
-console.log(testAgent.predict_attendance(1, attendance_history) == testAgent.predict_attendance(1, attendance_history));
+// console.log(testAgent.predict_attendance(1, attendance_history) == testAgent.predict_attendance(1, attendance_history));
+
+function manageAttendees(week_nr, attendee) {
+    if (attendee.is_attending) {
+        showAttendee(week_nr, attendee.id);
+        attendance_history[week_nr]++;
+    }
+    // attendees_map[attendee.id] = attendee.is_attending;
+}
 
 function generateRandomAttendance() {
     return Math.floor(Math.random() * 100);
+}
+
+function manageOvercrowded(week_nr) {
+    if (isOvercrowded(week_nr)) {
+        showOvercrowded(week_nr);
+        console.log("OVERCROWDED");
+    }
+}
+
+function showOvercrowded(week_nr) {
+    setText(canvas.width / 2, canvas.height / 4 + week_nr*20, week_nr + ": OVERCROWDED", "#FF0000");
+}
+
+function showAttendee(week_nr, id) {
+    drawPoint(week_nr * 6, id * 4 + 10);
+}
+
+function drawPoint(x, y) {
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(x, y, 3, 3); // fill in the pixel at (10,10)
+}
+
+function setText(x, y, content, color) {
+    ctx.font = "1rem Arial";
+    ctx.fillStyle = color;
+    ctx.fillText(content, x, y);
+    // ctx.fillText(content, x, y);
+    // ctx.strokeText(content, x, y);
 }
