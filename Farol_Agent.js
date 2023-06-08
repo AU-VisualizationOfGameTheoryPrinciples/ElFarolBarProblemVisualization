@@ -3,6 +3,8 @@ const AMOUNT_OF_PEOPLE = 100;
 const OVERCROWDING_THRESHOLD = 60;
 const CLOSE_CALL_EPSILON = 5;
 
+const TOTAL_WEEKS = 3;
+
 const STRATEGY_UTIL_BOOST = 1;
 var attendance_history = new Array(AMOUNT_OF_PEOPLE);
 var attendees_map = new Array(); // per week?
@@ -26,13 +28,13 @@ class Farol_Agent {
         // this.weight_list = weights_list;
         this.first_strategy = Math.floor(AMOUNT_OF_PEOPLE * Math.random());
         this.set_random_strategies(strategies_nr);
-        this.predictionHistory = new Array();
+        this.prediction_history = new Array(TOTAL_WEEKS);
         this.score = 0;
     }
 
     predict_attendance(week_nr, attendance_history) {
         let bestStrategy = this.strategies_set.peek();
-        let prediction = bestStrategy.weighting_attendences_func(week_nr, bestStrategy.weights_list, attendance_history); 
+        let prediction = bestStrategy.weighting_attendances_func(week_nr, bestStrategy.weights_list, attendance_history);
         return prediction;
     }
 
@@ -43,7 +45,7 @@ class Farol_Agent {
     set_random_strategies(nr) {
         // add random strategies to the list of strategies
         this.strategies_set = new PriorityQueue();
-        for(let i = 0; i<nr; i++){
+        for (let i = 0; i < nr; i++) {
             this.strategies_set.add(this.generate_random_strategy());
         }
     }
@@ -54,13 +56,14 @@ class Farol_Agent {
         this.strategies_set.getHeap().forEach(element => {
             console.log(element);
             // let value = element.getValue();
+            // console.log("element: " + element + " value: " + value);
             let value = 0;
-            console.log("element: " + element + " value: " + value);
             value += element.determine_error(week_nr, this.memory_size, attendance_history);
+            console.log("added value: " + value);
             element.setValue(value);
         });
 
-        // this.strategies_set.heapifyDown();
+        this.strategies_set.heapifyUp();
     }
 
     sort_strategies() {
@@ -68,15 +71,16 @@ class Farol_Agent {
     }
 
     decide_attending(week_nr, attendance_history) {
-        prediction = this.predict_attendance(week_nr, attendance_history);
+        let prediction = this.predict_attendance(week_nr, attendance_history);
         this.is_attending = prediction <= OVERCROWDING_THRESHOLD;
         // attendees per week?
         // attendees_map[this.id] = this.is_attending;
-        this.prediction_history[week_nr] = prediction;
+        this.prediction_history.push(prediction);
+        manageAttendees(week_nr, this);
     }
 
     add_score(week_nr) {
-        if(!isOvercrowded(week_nr) && this.is_attending) {
+        if (!isOvercrowded(week_nr) && this.is_attending) {
             this.score = this.score + 1;
         }
     }
@@ -84,13 +88,13 @@ class Farol_Agent {
 
 class Farol_Strategy {
     weights_list;
-    weighting_attendences_func;
+    weighting_attendances_func;
     error_value;
 
     constructor(memory_size, first_strategy) {
         console.log("const")
         this.weights_list = new Array(memory_size);
-        this.weighting_attendences_func = this.generate_func(memory_size, first_strategy);
+        this.weighting_attendances_func = this.generate_func(memory_size, first_strategy);
         this.error_value = 0;
     }
 
@@ -100,24 +104,26 @@ class Farol_Strategy {
         }
         return (week_nr, weights_list, attendance_history) => {
             let prediction = 0;
-            let div = week_nr < memory_size ? week_nr : memory_size;
-            for (let i = 0; i < memory_size; i++) {
-                let attendance = attendance_history[week_nr - i];
+            let length = week_nr < memory_size ? week_nr : memory_size;
+            for (let i = 0; i < length; i++) {
+                // current attendance should be skipped
+                let attendance = attendance_history[week_nr - (i + 1)];
                 attendance = (attendance && attendance > 0) ? attendance : 0;
                 prediction += (attendance * weights_list[i]);
-                console.log("i -> " + i + " -> " + prediction);
+                console.log("i -> " + (-1 * (i + 1)) + " -> " + prediction);
             }
-            prediction = Math.floor(prediction + first_strategy);
+            prediction = Math.round(prediction + first_strategy);
+            console.log("first:" + first_strategy);
             console.log("pred:" + prediction);
             return prediction;
         }
     }
 
-    determine_error(week_nr, memory_size, attendance_history){
+    determine_error(week_nr, memory_size, attendance_history) {
         let error = 0;
-        let length = week_nr+1 < memory_size ? week_nr+1 : memory_size;
+        let length = week_nr < memory_size ? week_nr + 1 : memory_size + 1;
         for (let i = 0; i < length; i++) {
-            error+= differenceToAttendance(this.weighting_attendences_func(week_nr-i, this.weights_list, attendance_history), attendance_history[week_nr-i]);
+            error += differenceToAttendance(this.weighting_attendances_func(week_nr - i, this.weights_list, attendance_history), attendance_history[week_nr - i]);
             console.log("err:" + error);
         }
         return error;
@@ -150,7 +156,7 @@ function differenceToAttendance(prediction, attendance) {
 
 // var testArray = [50, 30, 80];
 // attendance_history = testArray;
-var testAgent = new Farol_Agent(1,2,4);
+var testAgent = new Farol_Agent(1, 2, 4);
 console.log(testAgent.first_strategy);
 console.log("score:" + testAgent.score);
 
@@ -158,9 +164,7 @@ console.log("score:" + testAgent.score);
 //     console.log(generateRandomWeight())
 // }
 
-for (let i = 0; i < 2; i++) {
-    console.log("predict: " + testAgent.predict_attendance(i, attendance_history));
-
+for (let i = 0; i < TOTAL_WEEKS; i++) {
     attendance_history[i] = generateRandomAttendance();
     console.log("ah" + i + ": " + attendance_history[i]);
 
