@@ -79,7 +79,7 @@ class PriorityQueue {
 	heapifyUp() {
 		let index = this.heap.length - 1;
         // check significance value of items
-		while (this.hasParent(index) && this.parent(index).getValue() < this.heap[index].getValue()) {
+		while (this.hasParent(index) && this.parent(index).getValue() > this.heap[index].getValue()) {
 			this.swap(this.getParentIndex(index), index);
 			index = this.getParentIndex(index);
 		}
@@ -87,14 +87,13 @@ class PriorityQueue {
 	}
 
 	heapifyDown() {
-		console.log("test")
 		let index = 0;
 		while (this.hasLeftChild(index)) {
 			let smallerChildIndex = this.getLeftChildIndex(index);
-			if (this.hasRightChild(index) && this.rightChild(index).getValue() > this.leftChild(index).getValue()) {
+			if (this.hasRightChild(index) && this.rightChild(index).getValue() < this.leftChild(index).getValue()) {
 				smallerChildIndex = this.getRightChildIndex(index);
 			}
-			if (this.heap[index].getValue() > this.heap[smallerChildIndex].getValue()) {
+			if (this.heap[index].getValue() < this.heap[smallerChildIndex].getValue()) {
 				break;
 			} else {
 				this.swap(index, smallerChildIndex);
