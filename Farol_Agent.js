@@ -4,21 +4,48 @@ const OVERCROWDING_THRESHOLD = 60;
 const CLOSE_CALL_EPSILON = 5;
 
 const TOTAL_WEEKS = 3;
+const AGENTS_NR = 2;
+
+const X_SCALE = 2;
 
 const STRATEGY_UTIL_BOOST = 1;
 var attendance_history = new Array(AMOUNT_OF_PEOPLE);
-var attendees_map = new Array(); // per week?
 attendance_history.fill(0);
 var current_week;
 var agents = new Array(AMOUNT_OF_PEOPLE);
 
+var attendees_map_per_week = []; // per week?
+var rows = 2; // bar: 0, home: 1
+var atBar = [];
+var atHome = [];
+var columns = TOTAL_WEEKS;
+// creating two-dimensional array
+for (let i = 0; i < rows; i++) {
+    attendees_map_per_week[i] = [];
+    for (let j = 0; j < columns; j++) {
+        attendees_map_per_week[i][j] = 0;
+    }
+}
+
+
+var color_map = new Array(TOTAL_WEEKS);
+color_map[0] = "#FF0000";
+color_map[1] = "#00FF00";
+color_map[2] = "#0000FF";
+color_map[3] = "#0F0000";
+color_map[4] = "#000F00";
+color_map[5] = "#00000F";
+
 var canvas = document.getElementById("attendance_graph");
 var ctx = canvas.getContext("2d");
-ctx.beginPath();
-ctx.moveTo(0, 10);
-ctx.lineTo(300, 10);
-ctx.stroke();
-// ctx.fillStyle = "#000000";
+
+// graph line
+drawLine(0, 100, 100, 0, "#000000");
+
+// capacity line
+drawLine(60, 100, 0, -100, "#000000");
+
+var days_list = document.getElementById("days_list");
 
 class Farol_Agent {
     id;
@@ -80,10 +107,11 @@ class Farol_Agent {
 
     decide_attending(week_nr, attendance_history) {
         let prediction = this.predict_attendance(week_nr, attendance_history);
+        console.log("--- predict" + this.id + " [" + week_nr + "]: " + prediction);
         this.is_attending = prediction <= OVERCROWDING_THRESHOLD;
         // attendees per week?
         // attendees_map[this.id] = this.is_attending;
-        this.prediction_history.push(prediction);
+        this.prediction_history[week_nr] = prediction;
         manageAttendees(week_nr, this);
     }
 
@@ -164,35 +192,62 @@ function differenceToAttendance(prediction, attendance) {
 
 // var testArray = [50, 30, 80];
 // attendance_history = testArray;
-var testAgent = new Farol_Agent(1, 2, 4);
-console.log(testAgent.first_strategy);
-console.log("score:" + testAgent.score);
+// var testAgent = new Farol_Agent(1, 2, 4);
+// var testAgent2 = new Farol_Agent(2, 2, 4);
+// console.log(testAgent.first_strategy);
+// console.log("score:" + testAgent.score);
+setupAgents(2, 4);
 
 // for(let i = 0; i<100; i++){
 //     console.log(generateRandomWeight())
 // }
 
-for (let i = 0; i < TOTAL_WEEKS; i++) {
-    // console.log("-- predict: " + testAgent.predict_attendance(i, attendance_history));
-    testAgent.decide_attending(i, attendance_history);
-    // if(i != 0)
-    attendance_history[i] = generateRandomAttendance();
-    console.log("ah" + i + ": " + attendance_history[i]);
+var days_summary = document.getElementById("days_summary");
 
+for (let i = 0; i < TOTAL_WEEKS; i++) {
+    atBar = [];
+    atHome = [];
+    let multiCanvasContext = setupCanvas();
+    // console.log("-- predict: " + testAgent.predict_attendance(i, attendance_history));
+    for (let j = 0; j < AGENTS_NR; j++) {
+        agents[j].decide_attending(i, attendance_history);
+    }
+    // attendees_map_per_week[0][week_nr] = atBar;
+    // attendees_map_per_week[1][week_nr] = atHome;
+
+    // testAgent.decide_attending(i, attendance_history);
+    // testAgent2.decide_attending(i, attendance_history);
+    // if(i != 0)
+    console.log("-- ah" + i + ": " + attendance_history[i]);
+    attendance_history[i] += generateRandomAttendance();
+    console.log("--- ah" + i + ": " + attendance_history[i]);
+
+    addDay(i, attendance_history[i], color_map[i]);
+    drawLine(attendance_history[i], 100, 0, -100, color_map[i]);
     manageOvercrowded(i);
 
-    testAgent.rank_strategies(i, attendance_history);
-    testAgent.strategies_set.print();
+    drawMultiCanvasDay(multiCanvasContext, i);
+
+    for (let k = 0; k < AGENTS_NR; k++) {
+        agents[k].rank_strategies(i, attendance_history);
+        agents[k].strategies_set.print();
+    }
+    // testAgent.rank_strategies(i, attendance_history);
+    // testAgent.strategies_set.print();
 }
 
 // console.log(testAgent.predict_attendance(1, attendance_history) == testAgent.predict_attendance(1, attendance_history));
 
 function manageAttendees(week_nr, attendee) {
     if (attendee.is_attending) {
-        showAttendee(week_nr, attendee.id);
+        // showAttendee(week_nr, attendee);
         attendance_history[week_nr]++;
+        atBar.push(attendee);
+    } else {
+        atHome.push(attendee);
     }
     // attendees_map[attendee.id] = attendee.is_attending;
+    showAttendee(week_nr, attendee);
 }
 
 function generateRandomAttendance() {
@@ -207,22 +262,86 @@ function manageOvercrowded(week_nr) {
 }
 
 function showOvercrowded(week_nr) {
-    setText(canvas.width / 2, canvas.height / 4 + week_nr*20, week_nr + ": OVERCROWDED", "#FF0000");
+    setText(canvas.width / 2, canvas.height / 4 + week_nr * 20, week_nr + ": OVERCROWDED", "#FF0000");
 }
 
-function showAttendee(week_nr, id) {
-    drawPoint(week_nr * 6, id * 4 + 10);
+function showAttendee(week_nr, attendee) {
+    let id = attendee.id;
+    let prediction = attendee.predict_attendance(week_nr, attendance_history);
+    prediction = prediction < 0 ? 1 : prediction;
+    // drawPoint(week_nr * 6, id * (-4) + (100 - 5));
+    drawPoint(prediction * X_SCALE, id * (-4) + (100 - 5), color_map[week_nr]);
 }
 
-function drawPoint(x, y) {
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(x, y, 3, 3); // fill in the pixel at (10,10)
+
+function addDay(week_nr, attendance, color) {
+    var elem = document.createElement("short");
+    elem.style.backgroundColor = color;
+    elem.append("week" + week_nr + ": " + attendance);
+    elem.style.color = "#FFFFFF";
+    elem.style.padding = "1em";
+    days_summary.append(elem);
+    // var elem = document.createElement(elementName)
+    // elem.setAttribute("class", className);
+    // elem.append(value);
+    // row.append(elem);
+    // return elem;
 }
 
-function setText(x, y, content, color) {
-    ctx.font = "1rem Arial";
-    ctx.fillStyle = color;
-    ctx.fillText(content, x, y);
+function setupCanvas() {
+    var canvas = document.createElement("canvas");
+    var canvasContext = canvas.getContext("2d");
+    // graph line
+    drawLine(0, 100, 100, 0, "#000000", canvasContext);
+
+    // capacity line
+    drawLine(60, 100, 0, -100, "#000000", canvasContext);
+    
+    days_list.append(canvas);
+    return canvasContext;
+}
+
+function setupAgents(strategies_nr, memory_size) {
+    for (let i = 0; i < AGENTS_NR; i++) {
+        agents[i] = new Farol_Agent(i + 1, strategies_nr, memory_size);
+    }
+}
+
+function drawMultiCanvasDay(context, week_nr) {
+    let atBarValue = 0;
+    for(let i = 0; i<atBar.length; i++){
+        drawLine(0, i * (-4) + (100 - 5), atBar[i].prediction_history[week_nr], 0, "#000000", context);
+        atBarValue = i;
+    }
+
+    // atHome above atBar
+    for(let j = 0; j<atHome.length; j++){
+        drawLine(0, (atBarValue+2+j) * (-4) + (100 - 5), atHome[j].prediction_history[week_nr], 0, "#000000", context);
+    }
+
+    // vertical line - to show actual attendance and attendees
+    drawLine(attendance_history[week_nr], (atBarValue+1) * (-4) + (100 - 5), 0, (atBarValue+1) * (4) + 5, color_map[week_nr], context);
+    // horizontal line - to show actual attendance and attendees
+    drawLine(0, (atBarValue+1) * (-4) + (100 - 5), attendance_history[week_nr], 0, color_map[week_nr], context);
+}
+
+function drawPoint(x, y, color, context = ctx) {
+    context.fillStyle = color;
+    context.fillRect(x, y, 3, 3); // fill in the pixel at (10,10)
+}
+
+function drawLine(x, y, dX, dY, color, context = ctx) {
+    context.beginPath();
+    context.moveTo(x * X_SCALE, y);
+    context.lineTo((x + dX) * X_SCALE, y + dY);
+    context.strokeStyle = color;
+    context.stroke();
+}
+
+function setText(x, y, content, color, context = ctx) {
+    context.font = "1rem Arial";
+    context.fillStyle = color;
+    context.fillText(content, x, y);
     // ctx.fillText(content, x, y);
     // ctx.strokeText(content, x, y);
 }
