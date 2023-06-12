@@ -4,9 +4,11 @@ const OVERCROWDING_THRESHOLD = 60;
 const CLOSE_CALL_EPSILON = 5;
 
 const TOTAL_WEEKS = 3;
-const AGENTS_NR = 2;
+const AGENTS_NR = 10;
 
 const X_SCALE = 2;
+const MAX_PREDICTION = AMOUNT_OF_PEOPLE;
+const MIN_PREDICTION = 0;
 
 const STRATEGY_UTIL_BOOST = 1;
 var attendance_history = new Array(AMOUNT_OF_PEOPLE);
@@ -149,6 +151,7 @@ class Farol_Strategy {
                 console.log("i -> " + (-1 * (i + 1)) + " -> " + prediction);
             }
             prediction = Math.round(prediction + first_strategy);
+            prediction = considerPredictionBoundaries(prediction);
             console.log("first:" + first_strategy);
             console.log("pred:" + prediction);
             return prediction;
@@ -204,6 +207,15 @@ setupAgents(2, 4);
 
 var days_summary = document.getElementById("days_summary");
 
+// -> Assign ???
+var days_summary_graph = document.getElementById("days_summary_graph");
+var days_summary_graph_canvas = setupCanvas(0, 100 - 60, 100, 0, true, days_summary_graph);
+
+/*
+    ===============
+    simulate weeks
+    ===============
+*/
 for (let i = 0; i < TOTAL_WEEKS; i++) {
     atBar = [];
     atHome = [];
@@ -219,12 +231,15 @@ for (let i = 0; i < TOTAL_WEEKS; i++) {
     // testAgent2.decide_attending(i, attendance_history);
     // if(i != 0)
     console.log("-- ah" + i + ": " + attendance_history[i]);
-    attendance_history[i] += generateRandomAttendance();
+    attendance_history[i] += generateRandomAttendance(AGENTS_NR);
     console.log("--- ah" + i + ": " + attendance_history[i]);
 
     addDay(i, attendance_history[i], color_map[i]);
     drawLine(attendance_history[i], 100, 0, -100, color_map[i]);
     manageOvercrowded(i);
+
+    // attendance over time
+    drawPoint((i + 1) * X_SCALE * 5 - 2, 100 - attendance_history[i] - 2, "#000000", days_summary_graph_canvas);
 
     drawMultiCanvasDay(multiCanvasContext, i);
 
@@ -236,6 +251,11 @@ for (let i = 0; i < TOTAL_WEEKS; i++) {
     // testAgent.strategies_set.print();
 }
 
+// attendance over time
+drawLine(0, 100, 5, -attendance_history[0], "#FF0000", days_summary_graph_canvas);
+for (let i = 0; i < TOTAL_WEEKS; i++) {
+    drawLine((i + 1) * 5, 100 - attendance_history[i], 5, attendance_history[i] - attendance_history[i + 1], "#FF0000", days_summary_graph_canvas);
+}
 // console.log(testAgent.predict_attendance(1, attendance_history) == testAgent.predict_attendance(1, attendance_history));
 
 function manageAttendees(week_nr, attendee) {
@@ -250,8 +270,8 @@ function manageAttendees(week_nr, attendee) {
     showAttendee(week_nr, attendee);
 }
 
-function generateRandomAttendance() {
-    return Math.floor(Math.random() * 100);
+function generateRandomAttendance(agents_nr = 0) {
+    return Math.floor(Math.random() * (AMOUNT_OF_PEOPLE-agents_nr));
 }
 
 function manageOvercrowded(week_nr) {
@@ -273,6 +293,15 @@ function showAttendee(week_nr, attendee) {
     drawPoint(prediction * X_SCALE, id * (-4) + (100 - 5), color_map[week_nr]);
 }
 
+function considerPredictionBoundaries(prediction) {
+    if (prediction > MAX_PREDICTION) {
+        prediction = MAX_PREDICTION;
+    } else if (prediction < MIN_PREDICTION) {
+        prediction = MIN_PREDICTION;
+    }
+    return prediction;
+}
+
 
 function addDay(week_nr, attendance, color) {
     var elem = document.createElement("short");
@@ -288,16 +317,21 @@ function addDay(week_nr, attendance, color) {
     // return elem;
 }
 
-function setupCanvas() {
-    var canvas = document.createElement("canvas");
+function setupCanvas(x = 60, y = 100, dX = 0, dY = -100, hasCapacity = true, predefinedCanvas = null) {
+    var canvas = predefinedCanvas == null ? document.createElement("canvas") : predefinedCanvas;
     var canvasContext = canvas.getContext("2d");
     // graph line
     drawLine(0, 100, 100, 0, "#000000", canvasContext);
 
     // capacity line
-    drawLine(60, 100, 0, -100, "#000000", canvasContext);
-    
-    days_list.append(canvas);
+    if (hasCapacity) {
+        drawLine(x, y, dX, dY, "#000000", canvasContext);
+    }
+
+    console.log("predCanv: " + predefinedCanvas);
+    if(!predefinedCanvas){
+        days_list.append(canvas);
+    }
     return canvasContext;
 }
 
@@ -309,25 +343,25 @@ function setupAgents(strategies_nr, memory_size) {
 
 function drawMultiCanvasDay(context, week_nr) {
     let atBarValue = 0;
-    for(let i = 0; i<atBar.length; i++){
+    for (let i = 0; i < atBar.length; i++) {
         drawLine(0, i * (-4) + (100 - 5), atBar[i].prediction_history[week_nr], 0, "#000000", context);
         atBarValue = i;
     }
 
     // atHome above atBar
-    for(let j = 0; j<atHome.length; j++){
-        drawLine(0, (atBarValue+2+j) * (-4) + (100 - 5), atHome[j].prediction_history[week_nr], 0, "#000000", context);
+    for (let j = 0; j < atHome.length; j++) {
+        drawLine(0, (atBarValue + 2 + j) * (-4) + (100 - 5), atHome[j].prediction_history[week_nr], 0, "#000000", context);
     }
 
     // vertical line - to show actual attendance and attendees
-    drawLine(attendance_history[week_nr], (atBarValue+1) * (-4) + (100 - 5), 0, (atBarValue+1) * (4) + 5, color_map[week_nr], context);
+    drawLine(attendance_history[week_nr], (atBarValue + 1) * (-4) + (100 - 5), 0, (atBarValue + 1) * (4) + 5, color_map[week_nr], context);
     // horizontal line - to show actual attendance and attendees
-    drawLine(0, (atBarValue+1) * (-4) + (100 - 5), attendance_history[week_nr], 0, color_map[week_nr], context);
+    drawLine(0, (atBarValue + 1) * (-4) + (100 - 5), attendance_history[week_nr], 0, color_map[week_nr], context);
 }
 
 function drawPoint(x, y, color, context = ctx) {
     context.fillStyle = color;
-    context.fillRect(x, y, 3, 3); // fill in the pixel at (10,10)
+    context.fillRect(x, y, 4, 4); // fill in the pixel at (10,10)
 }
 
 function drawLine(x, y, dX, dY, color, context = ctx) {

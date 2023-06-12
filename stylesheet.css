@@ -145,6 +145,17 @@ th {
     text-align: center;
 }
 
+.days_summary {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#attendance-graph {
+    display: flex;
+    justify-self: center;
+}
+
 .introduction {
     padding: 0.1rem 0.3rem;
 }
