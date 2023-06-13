@@ -4,11 +4,13 @@ const OVERCROWDING_THRESHOLD = 60;
 const CLOSE_CALL_EPSILON = 5;
 
 const TOTAL_WEEKS = 3;
-const AGENTS_NR = 10;
+const AGENTS_NR = 100;
 
 const X_SCALE = 2;
+const Y_LOWERBOUND = 420;
 const MAX_PREDICTION = AMOUNT_OF_PEOPLE;
 const MIN_PREDICTION = 0;
+const CanvasLowerBoundProportion = Y_LOWERBOUND / 500;
 
 const STRATEGY_UTIL_BOOST = 1;
 var attendance_history = new Array(AMOUNT_OF_PEOPLE);
@@ -41,11 +43,12 @@ color_map[5] = "#00000F";
 var canvas = document.getElementById("attendance_graph");
 var ctx = canvas.getContext("2d");
 
-// graph line
-drawLine(0, 100, 100, 0, "#000000");
+setupPredefinedCanvas(canvas);
+// // graph line
+// drawLine(0, Y_LOWERBOUND, 100, 0, "#000000");
 
-// capacity line
-drawLine(60, 100, 0, -100, "#000000");
+// // capacity line
+// drawLine(60, Y_LOWERBOUND, 0, -Y_LOWERBOUND, "#000000");
 
 var days_list = document.getElementById("days_list");
 
@@ -207,9 +210,10 @@ setupAgents(2, 4);
 
 var days_summary = document.getElementById("days_summary");
 
-// -> Assign ???
 var days_summary_graph = document.getElementById("days_summary_graph");
-var days_summary_graph_canvas = setupCanvas(0, 100 - 60, 100, 0, true, days_summary_graph);
+var days_summary_graph_size = 150;
+var days_summary_graph_lowerbound = days_summary_graph_size * CanvasLowerBoundProportion;
+var days_summary_graph_canvas = setupCanvas(0, days_summary_graph_lowerbound - OVERCROWDING_THRESHOLD, 100, 0, true, days_summary_graph, days_summary_graph_size, days_summary_graph_size);
 
 /*
     ===============
@@ -224,22 +228,13 @@ for (let i = 0; i < TOTAL_WEEKS; i++) {
     for (let j = 0; j < AGENTS_NR; j++) {
         agents[j].decide_attending(i, attendance_history);
     }
-    // attendees_map_per_week[0][week_nr] = atBar;
-    // attendees_map_per_week[1][week_nr] = atHome;
 
-    // testAgent.decide_attending(i, attendance_history);
-    // testAgent2.decide_attending(i, attendance_history);
-    // if(i != 0)
     console.log("-- ah" + i + ": " + attendance_history[i]);
     attendance_history[i] += generateRandomAttendance(AGENTS_NR);
     console.log("--- ah" + i + ": " + attendance_history[i]);
 
-    addDay(i, attendance_history[i], color_map[i]);
-    drawLine(attendance_history[i], 100, 0, -100, color_map[i]);
+    drawPredictionDay(i);
     manageOvercrowded(i);
-
-    // attendance over time
-    drawPoint((i + 1) * X_SCALE * 5 - 2, 100 - attendance_history[i] - 2, "#000000", days_summary_graph_canvas);
 
     drawMultiCanvasDay(multiCanvasContext, i);
 
@@ -247,15 +242,9 @@ for (let i = 0; i < TOTAL_WEEKS; i++) {
         agents[k].rank_strategies(i, attendance_history);
         agents[k].strategies_set.print();
     }
-    // testAgent.rank_strategies(i, attendance_history);
-    // testAgent.strategies_set.print();
 }
 
-// attendance over time
-drawLine(0, 100, 5, -attendance_history[0], "#FF0000", days_summary_graph_canvas);
-for (let i = 0; i < TOTAL_WEEKS; i++) {
-    drawLine((i + 1) * 5, 100 - attendance_history[i], 5, attendance_history[i] - attendance_history[i + 1], "#FF0000", days_summary_graph_canvas);
-}
+drawSummaryGraph();
 // console.log(testAgent.predict_attendance(1, attendance_history) == testAgent.predict_attendance(1, attendance_history));
 
 function manageAttendees(week_nr, attendee) {
@@ -271,7 +260,7 @@ function manageAttendees(week_nr, attendee) {
 }
 
 function generateRandomAttendance(agents_nr = 0) {
-    return Math.floor(Math.random() * (AMOUNT_OF_PEOPLE-agents_nr));
+    return Math.floor(Math.random() * (AMOUNT_OF_PEOPLE - agents_nr));
 }
 
 function manageOvercrowded(week_nr) {
@@ -285,12 +274,13 @@ function showOvercrowded(week_nr) {
     setText(canvas.width / 2, canvas.height / 4 + week_nr * 20, week_nr + ": OVERCROWDED", "#FF0000");
 }
 
+// predictions of all weeks
 function showAttendee(week_nr, attendee) {
     let id = attendee.id;
     let prediction = attendee.predict_attendance(week_nr, attendance_history);
     prediction = prediction < 0 ? 1 : prediction;
     // drawPoint(week_nr * 6, id * (-4) + (100 - 5));
-    drawPoint(prediction * X_SCALE, id * (-4) + (100 - 5), color_map[week_nr]);
+    drawPoint(prediction * X_SCALE, id * (-4) + (Y_LOWERBOUND - 5), color_map[week_nr]);
 }
 
 function considerPredictionBoundaries(prediction) {
@@ -301,7 +291,6 @@ function considerPredictionBoundaries(prediction) {
     }
     return prediction;
 }
-
 
 function addDay(week_nr, attendance, color) {
     var elem = document.createElement("short");
@@ -317,11 +306,20 @@ function addDay(week_nr, attendance, color) {
     // return elem;
 }
 
-function setupCanvas(x = 60, y = 100, dX = 0, dY = -100, hasCapacity = true, predefinedCanvas = null) {
+function setupPredefinedCanvas(predefinedCanvas) {
+    return setupCanvas(OVERCROWDING_THRESHOLD, Y_LOWERBOUND, 0, -Y_LOWERBOUND, true, predefinedCanvas, 500, 500);
+}
+
+function setupCanvas(x = OVERCROWDING_THRESHOLD, y = Y_LOWERBOUND, dX = 0, dY = -Y_LOWERBOUND, hasCapacity = true, predefinedCanvas = null, width = 500, height = 500) {
     var canvas = predefinedCanvas == null ? document.createElement("canvas") : predefinedCanvas;
+    canvas.width = width;
+    canvas.height = height;
+
+    let lowerBound = height * CanvasLowerBoundProportion;
+
     var canvasContext = canvas.getContext("2d");
     // graph line
-    drawLine(0, 100, 100, 0, "#000000", canvasContext);
+    drawLine(0, lowerBound, 100, 0, "#000000", canvasContext);
 
     // capacity line
     if (hasCapacity) {
@@ -329,7 +327,7 @@ function setupCanvas(x = 60, y = 100, dX = 0, dY = -100, hasCapacity = true, pre
     }
 
     console.log("predCanv: " + predefinedCanvas);
-    if(!predefinedCanvas){
+    if (!predefinedCanvas) {
         days_list.append(canvas);
     }
     return canvasContext;
@@ -341,22 +339,40 @@ function setupAgents(strategies_nr, memory_size) {
     }
 }
 
+// predictions of all weeks
+function drawPredictionDay(week_nr) {
+    addDay(week_nr, attendance_history[week_nr], color_map[week_nr]);
+    drawLine(attendance_history[week_nr], Y_LOWERBOUND, 0, -Y_LOWERBOUND, color_map[week_nr]);
+}
+
+function drawSummaryGraph() {
+    // attendance over time
+    drawLine(0, days_summary_graph_lowerbound, 5, -attendance_history[0], "#FF0000", days_summary_graph_canvas);
+    for (let i = 0; i < TOTAL_WEEKS; i++) {
+        drawPoint((i + 1) * X_SCALE * 5 - 2, days_summary_graph_lowerbound - attendance_history[i] - 2, "#000000", days_summary_graph_canvas);
+        drawLine((i + 1) * 5, days_summary_graph_lowerbound - attendance_history[i], 5, attendance_history[i] - attendance_history[i + 1], "#FF0000", days_summary_graph_canvas);
+    }
+}
+
 function drawMultiCanvasDay(context, week_nr) {
     let atBarValue = 0;
     for (let i = 0; i < atBar.length; i++) {
-        drawLine(0, i * (-4) + (100 - 5), atBar[i].prediction_history[week_nr], 0, "#000000", context);
+        drawLine(0, i * (-4) + (Y_LOWERBOUND - 5), atBar[i].prediction_history[week_nr], 0, "#000000", context);
         atBarValue = i;
     }
 
     // atHome above atBar
     for (let j = 0; j < atHome.length; j++) {
-        drawLine(0, (atBarValue + 2 + j) * (-4) + (100 - 5), atHome[j].prediction_history[week_nr], 0, "#000000", context);
+        drawLine(0, (atBarValue + 2 + j) * (-4) + (Y_LOWERBOUND - 5), atHome[j].prediction_history[week_nr], 0, "#000000", context);
     }
 
+    // horizontal capacity line
+    drawLine(0, OVERCROWDING_THRESHOLD * (-4) + (Y_LOWERBOUND - 5), 100, 0, "#BB2222", context);
+
     // vertical line - to show actual attendance and attendees
-    drawLine(attendance_history[week_nr], (atBarValue + 1) * (-4) + (100 - 5), 0, (atBarValue + 1) * (4) + 5, color_map[week_nr], context);
+    drawLine(attendance_history[week_nr], (atBarValue + 1) * (-4) + (Y_LOWERBOUND - 5), 0, (atBarValue + 1) * (4) + 5, color_map[week_nr], context);
     // horizontal line - to show actual attendance and attendees
-    drawLine(0, (atBarValue + 1) * (-4) + (100 - 5), attendance_history[week_nr], 0, color_map[week_nr], context);
+    drawLine(0, (atBarValue + 1) * (-4) + (Y_LOWERBOUND - 5), attendance_history[week_nr], 0, color_map[week_nr], context);
 }
 
 function drawPoint(x, y, color, context = ctx) {
