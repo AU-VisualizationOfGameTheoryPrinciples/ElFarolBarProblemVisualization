@@ -121,8 +121,8 @@ class Farol_Agent {
     }
 
     add_score(week_nr) {
-        if (!isOvercrowded(week_nr) && this.is_attending) {
-            this.score = this.score + 1;
+        if (this.is_attending) {
+            this.score = isOvercrowded(week_nr) ? this.score-1 : this.score+1;
         }
     }
 }
@@ -214,6 +214,7 @@ var days_summary_graph = document.getElementById("days_summary_graph");
 var days_summary_graph_size = 150;
 var days_summary_graph_lowerbound = days_summary_graph_size * CanvasLowerBoundProportion;
 var days_summary_graph_canvas = setupCanvas(0, days_summary_graph_lowerbound - OVERCROWDING_THRESHOLD, 100, 0, true, days_summary_graph, days_summary_graph_size, days_summary_graph_size);
+var barContext;
 
 /*
     ===============
@@ -224,9 +225,12 @@ for (let i = 0; i < TOTAL_WEEKS; i++) {
     atBar = [];
     atHome = [];
     let multiCanvasContext = setupCanvas();
+    barContext = setupCanvas(OVERCROWDING_THRESHOLD, 0, 0, -OVERCROWDING_THRESHOLD, false, null, 230, 200, 110);
     // console.log("-- predict: " + testAgent.predict_attendance(i, attendance_history));
     for (let j = 0; j < AGENTS_NR; j++) {
         agents[j].decide_attending(i, attendance_history);
+        agents[j].add_score(i);
+        console.log("score" + j + ": " + agents[j].score);
     }
 
     console.log("-- ah" + i + ": " + attendance_history[i]);
@@ -236,6 +240,7 @@ for (let i = 0; i < TOTAL_WEEKS; i++) {
     drawPredictionDay(i);
     manageOvercrowded(i);
 
+    drawBar(barContext);
     drawMultiCanvasDay(multiCanvasContext, i);
 
     for (let k = 0; k < AGENTS_NR; k++) {
@@ -310,7 +315,7 @@ function setupPredefinedCanvas(predefinedCanvas) {
     return setupCanvas(OVERCROWDING_THRESHOLD, Y_LOWERBOUND, 0, -Y_LOWERBOUND, true, predefinedCanvas, 500, 500);
 }
 
-function setupCanvas(x = OVERCROWDING_THRESHOLD, y = Y_LOWERBOUND, dX = 0, dY = -Y_LOWERBOUND, hasCapacity = true, predefinedCanvas = null, width = 500, height = 500) {
+function setupCanvas(x = OVERCROWDING_THRESHOLD, y = Y_LOWERBOUND, dX = 0, dY = -Y_LOWERBOUND, hasCapacity = true, predefinedCanvas = null, width = 500, height = 500, lineLength = 100) {
     var canvas = predefinedCanvas == null ? document.createElement("canvas") : predefinedCanvas;
     canvas.width = width;
     canvas.height = height;
@@ -319,7 +324,7 @@ function setupCanvas(x = OVERCROWDING_THRESHOLD, y = Y_LOWERBOUND, dX = 0, dY = 
 
     var canvasContext = canvas.getContext("2d");
     // graph line
-    drawLine(0, lowerBound, 100, 0, "#000000", canvasContext);
+    drawLine(0, lowerBound, lineLength, 0, "#000000", canvasContext);
 
     // capacity line
     if (hasCapacity) {
@@ -359,11 +364,15 @@ function drawMultiCanvasDay(context, week_nr) {
     for (let i = 0; i < atBar.length; i++) {
         drawLine(0, i * (-4) + (Y_LOWERBOUND - 5), atBar[i].prediction_history[week_nr], 0, "#000000", context);
         atBarValue = i;
+
+        drawBarDay(barContext, i, week_nr, atBar[i].score);
     }
 
     // atHome above atBar
     for (let j = 0; j < atHome.length; j++) {
         drawLine(0, (atBarValue + 2 + j) * (-4) + (Y_LOWERBOUND - 5), atHome[j].prediction_history[week_nr], 0, "#000000", context);
+
+        drawBarDay(barContext, j, week_nr, atHome[j].score, 110);
     }
 
     // horizontal capacity line
@@ -375,9 +384,28 @@ function drawMultiCanvasDay(context, week_nr) {
     drawLine(0, (atBarValue + 1) * (-4) + (Y_LOWERBOUND - 5), attendance_history[week_nr], 0, color_map[week_nr], context);
 }
 
-function drawPoint(x, y, color, context = ctx) {
+function drawBar(context) {
+    let wallHeight = -(OVERCROWDING_THRESHOLD+11);
+    let groundHeight = 200 * CanvasLowerBoundProportion;
+    let barWidth = 54;
+    drawLine(1, groundHeight, 0, wallHeight, "#000000", context);
+    drawLine(barWidth + 1, groundHeight, 0, wallHeight, "#000000", context);
+    drawLine(1, groundHeight + wallHeight, barWidth, 0, "#000000", context);
+}
+
+function drawBarDay(context, attendent_nr, week_nr, score, home_x_shift = 0) {
+    let barLineSize = 10;
+    let groundHeight = 200 * CanvasLowerBoundProportion;
+    let opacity = score / (week_nr+1) * 100;
+    if(opacity <= 5) {
+        opacity = 5;
+    }
+    drawPoint(home_x_shift + 8 + X_SCALE * 5 * (attendent_nr % (barLineSize)), groundHeight - 9 - 12 * Math.floor(attendent_nr / (barLineSize)), `rgba(0,0,0,${opacity}%)`, context, 6);
+}
+
+function drawPoint(x, y, color, context = ctx, size = 4) {
     context.fillStyle = color;
-    context.fillRect(x, y, 4, 4); // fill in the pixel at (10,10)
+    context.fillRect(x, y, size, size); // fill in the pixel at (10,10)
 }
 
 function drawLine(x, y, dX, dY, color, context = ctx) {
