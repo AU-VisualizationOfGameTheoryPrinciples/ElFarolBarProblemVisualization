@@ -1,10 +1,55 @@
 import { PriorityQueue } from "./PriorityQueue.js";
+import { get, setValueById, checkIfDefaultValue } from "./calcUtility.js";
+
+/*
+    ==================
+    Player Interaction
+    ==================
+*/
+var strategies_count = get("strategies_count");
+var memory_size = get("memory_size");
+var days = get("days");
+
+var has_player_agent = getFlag("has_player_agent");
+
+// TODO: add hide/show toggle for predictions
+var prediction_tab = document.getElementById("prediction_tab");
+// prediction_tab.style.visibility = "hidden";
+var player_prediction;
+var player_predictions;
+var attendences_in_memory;
+var current_iteration;
+
+// TODO: restructure utility functions in their own module
+function getFlag(name) {
+    let flag = get(name) === "true" ? true : false;
+    return flag;
+}
+
+setValueById("has_player_agent", has_player_agent);
+
+if (has_player_agent) {
+    // TODO: implement player interaction as one agent predicting per week
+    // prediction_tab.style.visibility = "show";
+    player_prediction = document.getElementById("prediction");
+    player_predictions = document.getElementById("player_predictions");
+    attendences_in_memory = document.getElementById("mem_attendances");
+    current_iteration = document.getElementById("day_nr");
+}
+
 const AMOUNT_OF_PEOPLE = 100;
 const OVERCROWDING_THRESHOLD = 60;
 const CLOSE_CALL_EPSILON = 5;
 
-const TOTAL_WEEKS = 3;
+const TOTAL_WEEKS = checkIfDefaultValue(days, 3);
+const STRATEGIES_COUNT = checkIfDefaultValue(strategies_count, 3);
+const MEMORY_SIZE = checkIfDefaultValue(memory_size, 3);
 const AGENTS_NR = 100;
+
+setValueById("strategies_count", STRATEGIES_COUNT);
+setValueById("memory_size", MEMORY_SIZE);
+setValueById("days", TOTAL_WEEKS);
+
 
 const X_SCALE = 2;
 const Y_LOWERBOUND = 420;
@@ -31,14 +76,14 @@ for (let i = 0; i < rows; i++) {
     }
 }
 
-
+// TODO: setup color_map and web design for more than 5 iterations
 var color_map = new Array(TOTAL_WEEKS);
 color_map[0] = "#FF0000";
 color_map[1] = "#00FF00";
 color_map[2] = "#0000FF";
-color_map[3] = "#0F0000";
-color_map[4] = "#000F00";
-color_map[5] = "#00000F";
+color_map[3] = "#AA0000";
+color_map[4] = "#00AA00";
+color_map[5] = "#0000AA";
 
 var canvas = document.getElementById("attendance_graph");
 var ctx = canvas.getContext("2d");
@@ -122,7 +167,8 @@ class Farol_Agent {
 
     add_score(week_nr) {
         if (this.is_attending) {
-            this.score = isOvercrowded(week_nr) ? this.score-1 : this.score+1;
+            this.score = isOvercrowded(week_nr) ? this.score - 1 : this.score + 1;
+            // TODO: add more score if prediction is close to actual attendance?
         }
     }
 }
@@ -202,7 +248,7 @@ function differenceToAttendance(prediction, attendance) {
 // var testAgent2 = new Farol_Agent(2, 2, 4);
 // console.log(testAgent.first_strategy);
 // console.log("score:" + testAgent.score);
-setupAgents(2, 4);
+setupAgents(STRATEGIES_COUNT, MEMORY_SIZE);
 
 // for(let i = 0; i<100; i++){
 //     console.log(generateRandomWeight())
@@ -229,8 +275,6 @@ for (let i = 0; i < TOTAL_WEEKS; i++) {
     // console.log("-- predict: " + testAgent.predict_attendance(i, attendance_history));
     for (let j = 0; j < AGENTS_NR; j++) {
         agents[j].decide_attending(i, attendance_history);
-        agents[j].add_score(i);
-        console.log("score" + j + ": " + agents[j].score);
     }
 
     console.log("-- ah" + i + ": " + attendance_history[i]);
@@ -240,13 +284,15 @@ for (let i = 0; i < TOTAL_WEEKS; i++) {
     drawPredictionDay(i);
     manageOvercrowded(i);
 
-    drawBar(barContext);
-    drawMultiCanvasDay(multiCanvasContext, i);
-
     for (let k = 0; k < AGENTS_NR; k++) {
+        agents[k].add_score(i);
+        console.log("score" + k + ": " + agents[k].score);
         agents[k].rank_strategies(i, attendance_history);
         agents[k].strategies_set.print();
     }
+
+    drawBar(barContext);
+    drawMultiCanvasDay(multiCanvasContext, i);
 }
 
 drawSummaryGraph();
@@ -385,7 +431,7 @@ function drawMultiCanvasDay(context, week_nr) {
 }
 
 function drawBar(context) {
-    let wallHeight = -(OVERCROWDING_THRESHOLD+11);
+    let wallHeight = -(OVERCROWDING_THRESHOLD + 11);
     let groundHeight = 200 * CanvasLowerBoundProportion;
     let barWidth = 54;
     drawLine(1, groundHeight, 0, wallHeight, "#000000", context);
@@ -396,8 +442,8 @@ function drawBar(context) {
 function drawBarDay(context, attendent_nr, week_nr, score, home_x_shift = 0) {
     let barLineSize = 10;
     let groundHeight = 200 * CanvasLowerBoundProportion;
-    let opacity = score / (week_nr+1) * 100;
-    if(opacity <= 5) {
+    let opacity = score / (week_nr + 1) * 100;
+    if (opacity <= 5) {
         opacity = 5;
     }
     drawPoint(home_x_shift + 8 + X_SCALE * 5 * (attendent_nr % (barLineSize)), groundHeight - 9 - 12 * Math.floor(attendent_nr / (barLineSize)), `rgba(0,0,0,${opacity}%)`, context, 6);

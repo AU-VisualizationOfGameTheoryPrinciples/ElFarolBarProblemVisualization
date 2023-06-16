@@ -160,6 +160,31 @@ th {
     padding: 0.1rem 0.3rem;
 }
 
+#prediction_tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#prediction_tab > div {
+    display: grid;
+    grid-template-columns: auto auto;
+    column-gap: 1em;
+}
+
+#prediction_tab > .player_predictions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* change appearance for read-only fields */
+#mem_attendances, .player_predictions input[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
 /* #captions {
     grid-row: 1;
 } */

@@ -59,7 +59,11 @@ function getValueById(id){
 }
 
 function setValueById(id, value){
-    document.getElementById(id).value = value;
+    if (typeof value == "boolean") {
+        document.querySelector(`#${id}`).checked = value;
+    } else {
+        document.getElementById(id).value = value;
+    }
 }
 
 function checkIfDefaultValue(elem, defaultValue){
@@ -177,3 +181,5 @@ function addValue(elementName, className, value, row) {
     row.append(elem);
     return elem;
 }
+
+export {get, setValueById, getValueById, checkIfDefaultValue};
