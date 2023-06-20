@@ -18,6 +18,9 @@ body {
     flex-direction: column;
     text-align: justify;
     margin: -1rem 2rem 2rem 2rem;
+}
+
+.site_introduction {
     background-color: white;
     border: 1px solid #000000;
 }
@@ -210,9 +213,14 @@ th {
 }
 
 /* change appearance for read-only fields */
-#mem_attendances, .player_predictions input[type=number] {
+#mem_attendances,
+.player_predictions input[type=number] {
     -moz-appearance: textfield;
     appearance: textfield;
+}
+
+#prediction_tab>.hide {
+    visibility: hidden;
 }
 
 /* #captions {
