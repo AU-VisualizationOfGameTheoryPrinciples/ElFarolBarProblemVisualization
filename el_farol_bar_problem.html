@@ -17,6 +17,29 @@
 <body>
     <h1 class="title">🍺 The El Farol Bar Problem! 🍹</h1>
     <img class="logo" src="./img/bar_icon.png">
+    <div class="introduction">
+        <p class="brief_introduction">On this site you can generate sample cases of the El Farol Bar Problem for several
+            days by submitting variable values.</p>
+        <p>The <strong>Maximum amount of people</strong> are all agents interested in going to the bar called "El
+            Farol". Here each agent chooses
+            to go by
+            the <strong>Probability of going to the bar</strong>. So for each sample day the bar has a specific count of
+            <strong>People at the Bar</strong>.
+            If more people are at the bar than the <strong>Capacity of the bar</strong>, the bar is crowded and every
+            person attending
+            is unhappy. If it's uncrowded, every person attending is happy. A summary of the happiness of all agents is
+            shown by <strong>Collected Utility</strong>, which sums up the utilities defined in the <strong>Utility
+                table</strong>. The number of sample
+            days is defined by <strong>Following Days (Iterations)</strong>. When the checkbox <strong>Adapting on
+                previous day's result</strong> is
+            checked, the agents decrease their <strong>Probability of going to the bar</strong>. Above the table a
+            <strong>Days' Summary</strong> is shown, showing how much <strong>good days</strong> are there in total. The
+            expression <strong>good days</strong> is a sum of days where the <strong>Collected Utility</strong> is
+            positive due to the given utilities in the <strong>Utility table</strong>. The goal is to achieve a maximum
+            of
+            <strong>Collected Utility</strong> for a specific <strong>Capacity of the bar</strong>.
+        </p>
+    </div>
     <div id="main">
         <form id="form" method="get" action="">
             <div class="form">
@@ -44,13 +67,16 @@
             </div>
             <input class="submit-button" type="submit" value="Submit">
         </form>
-        <div id="days_summary" class="days_summary"></div>
+        <div id="days_summary" class="days_summary">
+            <p><strong>Days' Summary</strong></p>
+        </div>
         <table id="results">
             <tr id="captions">
-                <th id="N">N</th>
-                <th id="c">c</th>
-                <th id="p">p</th>
-                <th id="bar">At the bar</th>
+                <th id="day_nr">Bar Day Number</th>
+                <!-- <th id="N">N</th> -->
+                <!-- <th id="c">c</th> -->
+                <th id="p">Probability of going per Agent</th>
+                <th id="bar">People at the Bar</th>
                 <th id="util">Collected Utility</th>
             </tr>
             <!-- <div id="values"> -->

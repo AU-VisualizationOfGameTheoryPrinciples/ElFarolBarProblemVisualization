@@ -4,6 +4,7 @@ var formerUtility;
 var iterations;
 var countGoodDays = 0;
 var countBadDays = 0;
+var current_day = 0;
 
 function init() {
     
@@ -15,7 +16,7 @@ function init() {
     
     var days = get("days");
     iterations = days > 0 ? days : 1;
-    for (let i = 0; i < iterations; i++) {
+    for (current_day; current_day < iterations; current_day++) {
         formerUtility = calcUtility();
         if(formerUtility>0){
             countGoodDays++;
@@ -134,9 +135,10 @@ function calcUtility() {
         // document.getElementById("values").append(N);
         var row = document.createElement("tr");
 
-        addValue("td", "N_value", people_count, row);
-        addValue("td", "c_value", capacity, row);
-        addValue("td", "p_value", probability, row);
+        addValue("td", "day_value", current_day+1, row);
+        // addValue("td", "N_value", people_count, row);
+        // addValue("td", "c_value", capacity, row);
+        addValue("td", "p_value", (probability*100) + "%", row);
         addValue("td", "bar_value", bar_filled, row);
         var util = addValue("td", "util_value", result, row);
 

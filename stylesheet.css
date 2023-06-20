@@ -9,6 +9,27 @@ body {
     row-gap: 5px;
 }
 
+.brief_introduction {
+    text-align: center;
+}
+
+.introduction {
+    display: flex;
+    flex-direction: column;
+    text-align: justify;
+    margin: -1rem 2rem 2rem 2rem;
+    background-color: white;
+    border: 1px solid #000000;
+}
+
+.introduction>p {
+    padding: 0rem 2rem 1rem 2rem;
+}
+
+.introduction>.brief_introduction {
+    padding-top: 1rem;
+}
+
 #form {
     display: flex;
     flex-direction: column;
@@ -27,7 +48,7 @@ body {
     position: absolute;
     max-width: 10%;
     min-width: 2em;
-    max-height: 10%;
+    max-height: 8%;
     min-height: 1em;
     display: none;
     top: 6em;
@@ -81,6 +102,8 @@ th {
     margin-right: -0.5em;
     background-color: #ac2828;
     border-bottom: 5px solid #2a0303;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: #8a8a8a2f;
 }
 
 .settings,
@@ -92,10 +115,12 @@ th {
 .settings {
     /* grid-column: 1; */
     column-gap: 10px;
+    row-gap: 5px;
 }
 
 .settings label {
     width: max-content;
+    align-self: center;
 }
 
 .util-label {
@@ -143,6 +168,11 @@ th {
 
 #days_summary {
     text-align: center;
+    border: 1px solid #000000;
+    background-color: white;
+    width: fit-content;
+    padding: 0 2%;
+    align-self: center;
 }
 
 .days_summary {
@@ -166,13 +196,13 @@ th {
     align-items: center;
 }
 
-#prediction_tab > div {
+#prediction_tab>div {
     display: grid;
     grid-template-columns: auto auto;
     column-gap: 1em;
 }
 
-#prediction_tab > .player_predictions {
+#prediction_tab>.player_predictions {
     display: flex;
     flex-direction: column;
     align-items: center;
