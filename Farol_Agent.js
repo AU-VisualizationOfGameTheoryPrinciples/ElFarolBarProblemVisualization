@@ -1,5 +1,5 @@
 import { PriorityQueue } from "./PriorityQueue.js";
-import { get, setValueById, checkIfDefaultValue } from "./calcUtility.js";
+import { get, setValueById, checkIfDefaultValue, getFlag } from "./manageFormValues.js";
 
 /*
     ==================
@@ -19,12 +19,6 @@ var player_prediction;
 var player_predictions;
 var attendences_in_memory;
 var current_iteration;
-
-// TODO: restructure utility functions in their own module
-function getFlag(name) {
-    let flag = get(name) === "true" ? true : false;
-    return flag;
-}
 
 setValueById("has_player_agent", has_player_agent);
 

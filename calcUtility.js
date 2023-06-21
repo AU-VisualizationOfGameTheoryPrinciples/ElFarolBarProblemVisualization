@@ -1,3 +1,5 @@
+import {get, getValueById, setValueById, checkIfDefaultValue} from "./manageFormValues.js"
+
 window.onload = init;
 
 var formerUtility;
@@ -35,41 +37,6 @@ function showSummary() {
     var summary_text = document.createElement("p");
     summary_text.innerText = countGoodDays + " good days and " + countBadDays + " bad days out of " + iterations + " days watched (" + Number.parseInt(countGoodDays/iterations*100) + "%).";
     summary_elem.append(summary_text);
-}
-
-function getEntries() {
-    var getText = window.location.search.substring(1);
-    const urlParams = new URLSearchParams(getText);
-
-    const entries = urlParams.entries();
-    return entries;
-}
-
-function get(name) {
-    if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search)) {
-        if (typeof name[1] == "undefined") {
-            return "";
-        }
-        return decodeURIComponent(name[1]);
-    }
-    return "";
-}
-
-function getValueById(id){
-    return document.getElementById(id).value;
-}
-
-function setValueById(id, value){
-    if (typeof value == "boolean") {
-        document.querySelector(`#${id}`).checked = value;
-    } else {
-        document.getElementById(id).value = value;
-    }
-}
-
-function checkIfDefaultValue(elem, defaultValue){
-    elem = Number.parseInt(elem);
-    return Number.isInteger(elem) ? elem : defaultValue;
 }
 
 function adaptProbability(prob){
