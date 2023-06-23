@@ -1,8 +1,13 @@
-document.getElementById('help').addEventListener("click", () => hideInfo(true));
+var helpInfo = document.getElementById('help');
+if(helpInfo){
+    helpInfo.addEventListener("click", () => hideInfo(true));
+}
 var isInfoHidden;
 window.onload = () => {
-    isInfoHidden = getFlag(localStorage['isInfoHidden']);
-    hideInfo(false);
+    if(helpInfo){
+        isInfoHidden = getFlag(localStorage['isInfoHidden']);
+        hideInfo(false);
+    }
 } 
 
 function getFlag(flag) {
@@ -18,10 +23,16 @@ function hideInfo(doesToggling) {
         isInfoHidden = !isInfoHidden;
         localStorage['isInfoHidden'] = isInfoHidden + "";
     }
+    let infoElem = document.getElementById('intro');
+    hideElement(infoElem, isInfoHidden);
+}
 
-    if(isInfoHidden){
-        document.getElementById('intro').style.display = "none";
+function hideElement(element, flag) {
+    if(flag){
+        element.style.display = "none";
     } else {
-        document.getElementById('intro').style.display = "inherit";
+        element.style.display = "inherit";
     }
 }
+
+export {hideElement};
