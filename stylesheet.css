@@ -73,6 +73,26 @@ body {
         display: block;
         top: 0.8em;
         left: 1em;
+        min-height: 5em;
+    }
+
+    .help {
+        top: 4%;
+        left: 92%;
+    }
+}
+
+@media (max-width: 820px) {
+    .help {
+        top: 16%;
+        left: 48%;
+    }
+}
+
+@media (max-width: 640px) {
+    .help {
+        top: 25%;
+        left: 47%;
     }
 }
 
@@ -221,6 +241,13 @@ th {
 
 #prediction_tab>.hide {
     visibility: hidden;
+}
+
+.help {
+    position: absolute;
+    padding: 1% 1.5%;
+    min-height: 3em;
+    min-width: 3em;
 }
 
 /* #captions {
