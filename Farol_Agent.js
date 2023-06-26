@@ -119,6 +119,7 @@ class Farol_Agent {
     is_attending; // boolean 
     prediction_history;
     score;  // score how accurate the predictions are
+    is_person; // to distinguish between computer and person agents (for predictions)
 
     constructor(id, strategies_nr, memory_size) {
         this.id = id;
@@ -133,6 +134,10 @@ class Farol_Agent {
     predict_attendance(week_nr, attendance_history) {
         let bestStrategy = this.strategies_set.peek();
         let prediction = bestStrategy.weighting_attendances_func(week_nr, bestStrategy.weights_list, attendance_history);
+        return prediction;
+    }
+
+    set_prediction(week_nr, prediction) {
         return prediction;
     }
 
@@ -280,7 +285,15 @@ var barContext;
     simulate weeks
     ===============
 */
-for (let i = 0; i < TOTAL_WEEKS; i++) {
+simulateWeeks();
+
+function simulateWeeks() {
+    for (let i = 0; i < TOTAL_WEEKS; i++) {
+        simulateWeek(i);
+    }
+}
+
+function simulateWeek(i) {
     atBar = [];
     atHome = [];
     let multiCanvasContext = setupCanvas();
