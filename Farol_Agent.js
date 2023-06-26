@@ -1,5 +1,6 @@
 import { PriorityQueue } from "./PriorityQueue.js";
 import { get, setValueById, checkIfDefaultValue, getFlag } from "./manageFormValues.js";
+import { hideElement } from "./hideScreenElements.js";
 
 /*
     ==================
@@ -9,6 +10,8 @@ import { get, setValueById, checkIfDefaultValue, getFlag } from "./manageFormVal
 var strategies_count = get("strategies_count");
 var memory_size = get("memory_size");
 var days = get("days");
+
+var has_player_agent_flag = document.getElementById("has_player_agent");
 
 var has_player_agent = getFlag("has_player_agent");
 
@@ -22,9 +25,25 @@ var current_iteration;
 
 setValueById("has_player_agent", has_player_agent);
 
+// TODO: check Toggling to be right
+var doesToggling = true;
+var isPredictionTabHidden = !has_player_agent;
+has_player_agent_flag.addEventListener("click", () => {doesToggling = true; hidePredictionTab();});
+function hidePredictionTab(){
+    if(doesToggling){
+        isPredictionTabHidden = !isPredictionTabHidden;
+    }
+
+    hideElement(prediction_tab, isPredictionTabHidden);
+    // prediction_tab.classList.toggle('hide');
+    // prediction_tab.style.visibility = "hidden";
+}
+
+// TODO: implement player interaction as one agent predicting per week
+// prediction_tab.style.visibility = "show";
+doesToggling = false;
+hidePredictionTab();
 if (has_player_agent) {
-    // TODO: implement player interaction as one agent predicting per week
-    // prediction_tab.style.visibility = "show";
     player_prediction = document.getElementById("prediction");
     player_predictions = document.getElementById("player_predictions");
     attendences_in_memory = document.getElementById("mem_attendances");
@@ -355,7 +374,7 @@ function setupPredefinedCanvas(predefinedCanvas) {
     return setupCanvas(OVERCROWDING_THRESHOLD, Y_LOWERBOUND, 0, -Y_LOWERBOUND, true, predefinedCanvas, 500, 500);
 }
 
-function setupCanvas(x = OVERCROWDING_THRESHOLD, y = Y_LOWERBOUND, dX = 0, dY = -Y_LOWERBOUND, hasCapacity = true, predefinedCanvas = null, width = 500, height = 500, lineLength = 100) {
+function setupCanvas(x = OVERCROWDING_THRESHOLD, y = Y_LOWERBOUND, dX = 0, dY = -Y_LOWERBOUND, hasCapacity = true, predefinedCanvas = null, width = 200, height = 500, lineLength = 100) {
     var canvas = predefinedCanvas == null ? document.createElement("canvas") : predefinedCanvas;
     canvas.width = width;
     canvas.height = height;
