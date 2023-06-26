@@ -39,7 +39,7 @@ function hidePredictionTab(){
     // prediction_tab.style.visibility = "hidden";
 }
 
-// TODO: implement player interaction as one agent predicting per week
+// TODO: implement player interaction as one agent predicting per day
 // prediction_tab.style.visibility = "show";
 doesToggling = false;
 hidePredictionTab();
@@ -54,14 +54,14 @@ const AMOUNT_OF_PEOPLE = 100;
 const OVERCROWDING_THRESHOLD = 60;
 const CLOSE_CALL_EPSILON = 5;
 
-const TOTAL_WEEKS = checkIfDefaultValue(days, 3);
+const TOTAL_DAYS = checkIfDefaultValue(days, 3);
 const STRATEGIES_COUNT = checkIfDefaultValue(strategies_count, 3);
 const MEMORY_SIZE = checkIfDefaultValue(memory_size, 3);
 const AGENTS_NR = 100;
 
 setValueById("strategies_count", STRATEGIES_COUNT);
 setValueById("memory_size", MEMORY_SIZE);
-setValueById("days", TOTAL_WEEKS);
+setValueById("days", TOTAL_DAYS);
 
 
 const X_SCALE = 2;
@@ -73,24 +73,24 @@ const CanvasLowerBoundProportion = Y_LOWERBOUND / 500;
 const STRATEGY_UTIL_BOOST = 1;
 var attendance_history = new Array(AMOUNT_OF_PEOPLE);
 attendance_history.fill(0);
-var current_week;
+var current_day;
 var agents = new Array(AMOUNT_OF_PEOPLE);
 
-var attendees_map_per_week = []; // per week?
+var attendees_map_per_day = []; // per day?
 var rows = 2; // bar: 0, home: 1
 var atBar = [];
 var atHome = [];
-var columns = TOTAL_WEEKS;
+var columns = TOTAL_DAYS;
 // creating two-dimensional array
 for (let i = 0; i < rows; i++) {
-    attendees_map_per_week[i] = [];
+    attendees_map_per_day[i] = [];
     for (let j = 0; j < columns; j++) {
-        attendees_map_per_week[i][j] = 0;
+        attendees_map_per_day[i][j] = 0;
     }
 }
 
 // TODO: setup color_map and web design for more than 5 iterations
-var color_map = new Array(TOTAL_WEEKS);
+var color_map = new Array(TOTAL_DAYS);
 color_map[0] = "#FF0000";
 color_map[1] = "#00FF00";
 color_map[2] = "#0000FF";
@@ -127,17 +127,17 @@ class Farol_Agent {
         // this.weight_list = weights_list;
         this.first_strategy = Math.floor(AMOUNT_OF_PEOPLE * Math.random());
         this.set_random_strategies(strategies_nr);
-        this.prediction_history = new Array(TOTAL_WEEKS);
+        this.prediction_history = new Array(TOTAL_DAYS);
         this.score = 0;
     }
 
-    predict_attendance(week_nr, attendance_history) {
+    predict_attendance(day_nr, attendance_history) {
         let bestStrategy = this.strategies_set.peek();
-        let prediction = bestStrategy.weighting_attendances_func(week_nr, bestStrategy.weights_list, attendance_history);
+        let prediction = bestStrategy.weighting_attendances_func(day_nr, bestStrategy.weights_list, attendance_history);
         return prediction;
     }
 
-    set_prediction(week_nr, prediction) {
+    set_prediction(day_nr, prediction) {
         return prediction;
     }
 
@@ -153,15 +153,15 @@ class Farol_Agent {
         }
     }
 
-    rank_strategies(week_nr, attendance_history) {
-        // set value of all strategies based on current and last weeks of memory-size
+    rank_strategies(day_nr, attendance_history) {
+        // set value of all strategies based on current and last days of memory-size
         console.log("strategies: " + this.strategies_set.getHeap().length);
         this.strategies_set.getHeap().forEach(element => {
             console.log(element);
             // let value = element.getValue();
             // console.log("element: " + element + " value: " + value);
             let value = 0;
-            value += element.determine_error(week_nr, this.memory_size, attendance_history);
+            value += element.determine_error(day_nr, this.memory_size, attendance_history);
             console.log("added value: " + value);
             element.setValue(value);
         });
@@ -173,19 +173,19 @@ class Farol_Agent {
         // sort strategies based on significance value
     }
 
-    decide_attending(week_nr, attendance_history) {
-        let prediction = this.predict_attendance(week_nr, attendance_history);
-        console.log("--- predict" + this.id + " [" + week_nr + "]: " + prediction);
+    decide_attending(day_nr, attendance_history) {
+        let prediction = this.predict_attendance(day_nr, attendance_history);
+        console.log("--- predict" + this.id + " [" + day_nr + "]: " + prediction);
         this.is_attending = prediction <= OVERCROWDING_THRESHOLD;
-        // attendees per week?
+        // attendees per day?
         // attendees_map[this.id] = this.is_attending;
-        this.prediction_history[week_nr] = prediction;
-        manageAttendees(week_nr, this);
+        this.prediction_history[day_nr] = prediction;
+        manageAttendees(day_nr, this);
     }
 
-    add_score(week_nr) {
+    add_score(day_nr) {
         if (this.is_attending) {
-            this.score = isOvercrowded(week_nr) ? this.score - 1 : this.score + 1;
+            this.score = isOvercrowded(day_nr) ? this.score - 1 : this.score + 1;
             // TODO: add more score if prediction is close to actual attendance?
         }
     }
@@ -207,12 +207,12 @@ class Farol_Strategy {
         for (let i = 0; i < memory_size; i++) {
             this.weights_list[i] = generateRandomWeight();
         }
-        return (week_nr, weights_list, attendance_history) => {
+        return (day_nr, weights_list, attendance_history) => {
             let prediction = 0;
-            let length = week_nr < memory_size ? week_nr : memory_size;
+            let length = day_nr < memory_size ? day_nr : memory_size;
             for (let i = 0; i < length; i++) {
                 // current attendance should be skipped
-                let attendance = attendance_history[week_nr - (i + 1)];
+                let attendance = attendance_history[day_nr - (i + 1)];
                 attendance = (attendance && attendance > 0) ? attendance : 0;
                 prediction += (attendance * weights_list[i]);
                 console.log("i -> " + (-1 * (i + 1)) + " -> " + prediction);
@@ -225,11 +225,11 @@ class Farol_Strategy {
         }
     }
 
-    determine_error(week_nr, memory_size, attendance_history) {
+    determine_error(day_nr, memory_size, attendance_history) {
         let error = 0;
-        let length = week_nr < memory_size ? week_nr + 1 : memory_size + 1;
+        let length = day_nr < memory_size ? day_nr + 1 : memory_size + 1;
         for (let i = 0; i < length; i++) {
-            error += differenceToAttendance(this.weighting_attendances_func(week_nr - i, this.weights_list, attendance_history), attendance_history[week_nr - i]);
+            error += differenceToAttendance(this.weighting_attendances_func(day_nr - i, this.weights_list, attendance_history), attendance_history[day_nr - i]);
             console.log("err:" + error);
         }
         return error;
@@ -248,8 +248,8 @@ function generateRandomWeight() {
     return 1 - (Math.random() * 2);
 }
 
-function isOvercrowded(week_nr) {
-    return attendance_history[week_nr] > OVERCROWDING_THRESHOLD;
+function isOvercrowded(day_nr) {
+    return attendance_history[day_nr] > OVERCROWDING_THRESHOLD;
 }
 
 function isClose(prediction, attendance) {
@@ -282,18 +282,18 @@ var barContext;
 
 /*
     ===============
-    simulate weeks
+    simulate days
     ===============
 */
-simulateWeeks();
+simulateDays();
 
-function simulateWeeks() {
-    for (let i = 0; i < TOTAL_WEEKS; i++) {
-        simulateWeek(i);
+function simulateDays() {
+    for (let i = 0; i < TOTAL_DAYS; i++) {
+        simulateDay(i);
     }
 }
 
-function simulateWeek(i) {
+function simulateDay(i) {
     atBar = [];
     atHome = [];
     let multiCanvasContext = setupCanvas();
@@ -324,40 +324,40 @@ function simulateWeek(i) {
 drawSummaryGraph();
 // console.log(testAgent.predict_attendance(1, attendance_history) == testAgent.predict_attendance(1, attendance_history));
 
-function manageAttendees(week_nr, attendee) {
+function manageAttendees(day_nr, attendee) {
     if (attendee.is_attending) {
-        // showAttendee(week_nr, attendee);
-        attendance_history[week_nr]++;
+        // showAttendee(day_nr, attendee);
+        attendance_history[day_nr]++;
         atBar.push(attendee);
     } else {
         atHome.push(attendee);
     }
     // attendees_map[attendee.id] = attendee.is_attending;
-    showAttendee(week_nr, attendee);
+    showAttendee(day_nr, attendee);
 }
 
 function generateRandomAttendance(agents_nr = 0) {
     return Math.floor(Math.random() * (AMOUNT_OF_PEOPLE - agents_nr));
 }
 
-function manageOvercrowded(week_nr) {
-    if (isOvercrowded(week_nr)) {
-        showOvercrowded(week_nr);
+function manageOvercrowded(day_nr) {
+    if (isOvercrowded(day_nr)) {
+        showOvercrowded(day_nr);
         console.log("OVERCROWDED");
     }
 }
 
-function showOvercrowded(week_nr) {
-    setText(canvas.width / 2, canvas.height / 4 + week_nr * 20, week_nr + ": OVERCROWDED", "#FF0000");
+function showOvercrowded(day_nr) {
+    setText(canvas.width / 2, canvas.height / 4 + day_nr * 20, day_nr + ": OVERCROWDED", "#FF0000");
 }
 
-// predictions of all weeks
-function showAttendee(week_nr, attendee) {
+// predictions of all days
+function showAttendee(day_nr, attendee) {
     let id = attendee.id;
-    let prediction = attendee.predict_attendance(week_nr, attendance_history);
+    let prediction = attendee.predict_attendance(day_nr, attendance_history);
     prediction = prediction < 0 ? 1 : prediction;
-    // drawPoint(week_nr * 6, id * (-4) + (100 - 5));
-    drawPoint(prediction * X_SCALE, id * (-4) + (Y_LOWERBOUND - 5), color_map[week_nr]);
+    // drawPoint(day_nr * 6, id * (-4) + (100 - 5));
+    drawPoint(prediction * X_SCALE, id * (-4) + (Y_LOWERBOUND - 5), color_map[day_nr]);
 }
 
 function considerPredictionBoundaries(prediction) {
@@ -369,10 +369,10 @@ function considerPredictionBoundaries(prediction) {
     return prediction;
 }
 
-function addDay(week_nr, attendance, color) {
+function addDay(day_nr, attendance, color) {
     var elem = document.createElement("short");
     elem.style.backgroundColor = color;
-    elem.append("week" + week_nr + ": " + attendance);
+    elem.append("day" + day_nr + ": " + attendance);
     elem.style.color = "#FFFFFF";
     elem.style.padding = "1em";
     days_summary.append(elem);
@@ -416,44 +416,44 @@ function setupAgents(strategies_nr, memory_size) {
     }
 }
 
-// predictions of all weeks
-function drawPredictionDay(week_nr) {
-    addDay(week_nr, attendance_history[week_nr], color_map[week_nr]);
-    drawLine(attendance_history[week_nr], Y_LOWERBOUND, 0, -Y_LOWERBOUND, color_map[week_nr]);
+// predictions of all days
+function drawPredictionDay(day_nr) {
+    addDay(day_nr, attendance_history[day_nr], color_map[day_nr]);
+    drawLine(attendance_history[day_nr], Y_LOWERBOUND, 0, -Y_LOWERBOUND, color_map[day_nr]);
 }
 
 function drawSummaryGraph() {
     // attendance over time
     drawLine(0, days_summary_graph_lowerbound, 5, -attendance_history[0], "#FF0000", days_summary_graph_canvas);
-    for (let i = 0; i < TOTAL_WEEKS; i++) {
+    for (let i = 0; i < TOTAL_DAYS; i++) {
         drawPoint((i + 1) * X_SCALE * 5 - 2, days_summary_graph_lowerbound - attendance_history[i] - 2, "#000000", days_summary_graph_canvas);
         drawLine((i + 1) * 5, days_summary_graph_lowerbound - attendance_history[i], 5, attendance_history[i] - attendance_history[i + 1], "#FF0000", days_summary_graph_canvas);
     }
 }
 
-function drawMultiCanvasDay(context, week_nr) {
+function drawMultiCanvasDay(context, day_nr) {
     let atBarValue = 0;
     for (let i = 0; i < atBar.length; i++) {
-        drawLine(0, i * (-4) + (Y_LOWERBOUND - 5), atBar[i].prediction_history[week_nr], 0, "#000000", context);
+        drawLine(0, i * (-4) + (Y_LOWERBOUND - 5), atBar[i].prediction_history[day_nr], 0, "#000000", context);
         atBarValue = i;
 
-        drawBarDay(barContext, i, week_nr, atBar[i].score);
+        drawBarDay(barContext, i, day_nr, atBar[i].score);
     }
 
     // atHome above atBar
     for (let j = 0; j < atHome.length; j++) {
-        drawLine(0, (atBarValue + 2 + j) * (-4) + (Y_LOWERBOUND - 5), atHome[j].prediction_history[week_nr], 0, "#000000", context);
+        drawLine(0, (atBarValue + 2 + j) * (-4) + (Y_LOWERBOUND - 5), atHome[j].prediction_history[day_nr], 0, "#000000", context);
 
-        drawBarDay(barContext, j, week_nr, atHome[j].score, 110);
+        drawBarDay(barContext, j, day_nr, atHome[j].score, 110);
     }
 
     // horizontal capacity line
     drawLine(0, OVERCROWDING_THRESHOLD * (-4) + (Y_LOWERBOUND - 5), 100, 0, "#BB2222", context);
 
     // vertical line - to show actual attendance and attendees
-    drawLine(attendance_history[week_nr], (atBarValue + 1) * (-4) + (Y_LOWERBOUND - 5), 0, (atBarValue + 1) * (4) + 5, color_map[week_nr], context);
+    drawLine(attendance_history[day_nr], (atBarValue + 1) * (-4) + (Y_LOWERBOUND - 5), 0, (atBarValue + 1) * (4) + 5, color_map[day_nr], context);
     // horizontal line - to show actual attendance and attendees
-    drawLine(0, (atBarValue + 1) * (-4) + (Y_LOWERBOUND - 5), attendance_history[week_nr], 0, color_map[week_nr], context);
+    drawLine(0, (atBarValue + 1) * (-4) + (Y_LOWERBOUND - 5), attendance_history[day_nr], 0, color_map[day_nr], context);
 }
 
 function drawBar(context) {
@@ -465,10 +465,10 @@ function drawBar(context) {
     drawLine(1, groundHeight + wallHeight, barWidth, 0, "#000000", context);
 }
 
-function drawBarDay(context, attendent_nr, week_nr, score, home_x_shift = 0) {
+function drawBarDay(context, attendent_nr, day_nr, score, home_x_shift = 0) {
     let barLineSize = 10;
     let groundHeight = 200 * CanvasLowerBoundProportion;
-    let opacity = score / (week_nr + 1) * 100;
+    let opacity = score / (day_nr + 1) * 100;
     if (opacity <= 5) {
         opacity = 5;
     }
