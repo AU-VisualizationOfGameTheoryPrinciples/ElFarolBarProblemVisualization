@@ -40,18 +40,18 @@
             </div>
             <input class="submit-button" type="submit" value="Submit">
         </form>
-        <div id="prediction_tab">
+        <div id="prediction_tab" style="display: none;">
             <p>Day <short id="day_nr">X</short></p>
             <div>
                 <label for="prediction">Prediction:</label>
                 <input type="number" id="prediction" name="prediction">
                 <label for="mem_attendances">Attendances in Memory:</label>
-                <input type="number" id="mem_attendances" name="mem_attendances" disabled>
+                <input type="text" id="mem_attendances" name="mem_attendances" disabled>
             </div>
-            <button class="submit-button">predict</button>
+            <button id="prediction_button" class="submit-button">predict</button>
             <div class="player_predictions">
                 <label for="player_predictions">Predictions:</label>
-                <input type="number" id="player_predictions" name="player_predictions" disabled>
+                <input type="text" id="player_predictions" name="player_predictions" disabled>
             </div>
         </div>
         <!-- <table id="results">

@@ -1,5 +1,5 @@
 import { PriorityQueue } from "./PriorityQueue.js";
-import { get, setValueById, checkIfDefaultValue, getFlag } from "./manageFormValues.js";
+import { get, getValueById, setValueById, checkIfDefaultValue, getFlag, hasSubmittedValues } from "./manageFormValues.js";
 import { hideElement } from "./hideScreenElements.js";
 
 /*
@@ -11,7 +11,7 @@ var strategies_count = get("strategies_count");
 var memory_size = get("memory_size");
 var days = get("days");
 
-var has_player_agent_flag = document.getElementById("has_player_agent");
+var has_player_agent_elem = document.getElementById("has_player_agent");
 
 var has_player_agent = getFlag("has_player_agent");
 
@@ -22,15 +22,20 @@ var player_prediction;
 var player_predictions;
 var attendences_in_memory;
 var current_iteration;
+var prediction_button;
+
+var current_day;
 
 setValueById("has_player_agent", has_player_agent);
 
-// TODO: check Toggling to be right
 var doesToggling = true;
 var isPredictionTabHidden = !has_player_agent;
-has_player_agent_flag.addEventListener("click", () => {doesToggling = true; hidePredictionTab();});
-function hidePredictionTab(){
-    if(doesToggling){
+
+// toggle by clicking button
+// has_player_agent_elem.addEventListener("click", () => { doesToggling = true; hidePredictionTab(); });
+
+function hidePredictionTab() {
+    if (doesToggling) {
         isPredictionTabHidden = !isPredictionTabHidden;
     }
 
@@ -44,10 +49,11 @@ function hidePredictionTab(){
 doesToggling = false;
 hidePredictionTab();
 if (has_player_agent) {
-    player_prediction = document.getElementById("prediction");
+    player_prediction = getValueById("prediction");
     player_predictions = document.getElementById("player_predictions");
     attendences_in_memory = document.getElementById("mem_attendances");
     current_iteration = document.getElementById("day_nr");
+    prediction_button = document.getElementById("prediction_button");
 }
 
 const AMOUNT_OF_PEOPLE = 100;
@@ -73,7 +79,6 @@ const CanvasLowerBoundProportion = Y_LOWERBOUND / 500;
 const STRATEGY_UTIL_BOOST = 1;
 var attendance_history = new Array(AMOUNT_OF_PEOPLE);
 attendance_history.fill(0);
-var current_day;
 var agents = new Array(AMOUNT_OF_PEOPLE);
 
 var attendees_map_per_day = []; // per day?
@@ -97,18 +102,6 @@ color_map[2] = "#0000FF";
 color_map[3] = "#AA0000";
 color_map[4] = "#00AA00";
 color_map[5] = "#0000AA";
-
-var canvas = document.getElementById("attendance_graph");
-var ctx = canvas.getContext("2d");
-
-setupPredefinedCanvas(canvas);
-// // graph line
-// drawLine(0, Y_LOWERBOUND, 100, 0, "#000000");
-
-// // capacity line
-// drawLine(60, Y_LOWERBOUND, 0, -Y_LOWERBOUND, "#000000");
-
-var days_list = document.getElementById("days_list");
 
 class Farol_Agent {
     id;
@@ -134,11 +127,14 @@ class Farol_Agent {
     predict_attendance(day_nr, attendance_history) {
         let bestStrategy = this.strategies_set.peek();
         let prediction = bestStrategy.weighting_attendances_func(day_nr, bestStrategy.weights_list, attendance_history);
+        if (this.is_person) {
+            prediction = player_prediction;
+        }
         return prediction;
     }
 
-    set_prediction(day_nr, prediction) {
-        return prediction;
+    set_is_person_flag(bool) {
+        this.is_person = bool;
     }
 
     generate_random_strategy() {
@@ -260,37 +256,94 @@ function differenceToAttendance(prediction, attendance) {
     return Math.abs(prediction - attendance);
 }
 
-// var testArray = [50, 30, 80];
-// attendance_history = testArray;
-// var testAgent = new Farol_Agent(1, 2, 4);
-// var testAgent2 = new Farol_Agent(2, 2, 4);
-// console.log(testAgent.first_strategy);
-// console.log("score:" + testAgent.score);
-setupAgents(STRATEGIES_COUNT, MEMORY_SIZE);
-
 // for(let i = 0; i<100; i++){
 //     console.log(generateRandomWeight())
 // }
+var canvas = document.getElementById("attendance_graph");
+var ctx = canvas.getContext("2d");
 
 var days_summary = document.getElementById("days_summary");
 
 var days_summary_graph = document.getElementById("days_summary_graph");
 var days_summary_graph_size = 150;
 var days_summary_graph_lowerbound = days_summary_graph_size * CanvasLowerBoundProportion;
-var days_summary_graph_canvas = setupCanvas(0, days_summary_graph_lowerbound - OVERCROWDING_THRESHOLD, 100, 0, true, days_summary_graph, days_summary_graph_size, days_summary_graph_size);
+var days_summary_graph_canvas;
 var barContext;
+
+var days_list = document.getElementById("days_list");
 
 /*
     ===============
     simulate days
     ===============
 */
-simulateDays();
+if (hasSubmittedValues()) {
+    // var testArray = [50, 30, 80];
+    // attendance_history = testArray;
+    // var testAgent = new Farol_Agent(1, 2, 4);
+    // var testAgent2 = new Farol_Agent(2, 2, 4);
+    // console.log(testAgent.first_strategy);
+    // console.log("score:" + testAgent.score);
+    setupAgents(STRATEGIES_COUNT, MEMORY_SIZE);
+    simulateDays();
+}
 
 function simulateDays() {
-    for (let i = 0; i < TOTAL_DAYS; i++) {
-        simulateDay(i);
+    current_day = 0;
+    setupPredefinedCanvas(canvas);
+    // // graph line
+    // drawLine(0, Y_LOWERBOUND, 100, 0, "#000000");
+
+    // // capacity line
+    // drawLine(60, Y_LOWERBOUND, 0, -Y_LOWERBOUND, "#000000");
+
+    days_summary_graph_canvas = setupCanvas(0, days_summary_graph_lowerbound - OVERCROWDING_THRESHOLD, 100, 0, true, days_summary_graph, days_summary_graph_size, days_summary_graph_size);
+
+    if (has_player_agent) {
+        current_iteration.textContent = current_day;
+        player_predictions.value = "";
+        prediction_button.addEventListener("click", () => {
+            if (getValueById("prediction")) {
+                simulatePlayerPrediction();
+                showAttendancesInMemory();
+                if (current_day >= TOTAL_DAYS) {
+                    // TODO: implement stop for Days under given max value?
+                    drawSummaryGraph();
+                }
+            } else {
+                alert("No value!");
+            }
+        });
+    } else {
+        for (let i = 0; i < TOTAL_DAYS; i++) {
+            simulateDay(i);
+        }
+        drawSummaryGraph();
     }
+}
+
+function simulatePlayerPrediction() {
+    let predText = player_predictions.value;
+    player_prediction = getValueById("prediction");
+    predText = current_day == 0 ? predText : predText + "; ";
+    predText += player_prediction;
+    player_predictions.value = predText;
+
+    simulateDay(current_day);
+
+    current_iteration.textContent = ++current_day;
+
+}
+
+function showAttendancesInMemory() {
+    let length = current_day < memory_size ? current_day : memory_size;
+    let attendancesText = "";
+    for (let i = 0; i < length; i++) {
+        let attendance = " " + -(i + 1) + ": " + attendance_history[i];
+        // alert(attendance)
+        attendancesText += attendance;
+    }
+    attendences_in_memory.value = attendancesText;
 }
 
 function simulateDay(i) {
@@ -321,7 +374,6 @@ function simulateDay(i) {
     drawMultiCanvasDay(multiCanvasContext, i);
 }
 
-drawSummaryGraph();
 // console.log(testAgent.predict_attendance(1, attendance_history) == testAgent.predict_attendance(1, attendance_history));
 
 function manageAttendees(day_nr, attendee) {
@@ -413,6 +465,10 @@ function setupCanvas(x = OVERCROWDING_THRESHOLD, y = Y_LOWERBOUND, dX = 0, dY = 
 function setupAgents(strategies_nr, memory_size) {
     for (let i = 0; i < AGENTS_NR; i++) {
         agents[i] = new Farol_Agent(i + 1, strategies_nr, memory_size);
+        agents[i].set_is_person_flag(false);
+    }
+    if (has_player_agent) {
+        agents[0].set_is_person_flag(true);
     }
 }
 
@@ -431,20 +487,30 @@ function drawSummaryGraph() {
     }
 }
 
+function getAgentColor(agent) {
+    // TODO: check and implement change to player agent
+    let color = (agent.is_person == true) ? "#FF0000" : "#000000";
+    return color;
+}
+
 function drawMultiCanvasDay(context, day_nr) {
     let atBarValue = 0;
+    let agent_color;
+
     for (let i = 0; i < atBar.length; i++) {
-        drawLine(0, i * (-4) + (Y_LOWERBOUND - 5), atBar[i].prediction_history[day_nr], 0, "#000000", context);
+        agent_color = getAgentColor(atBar[i]);
+        drawLine(0, i * (-4) + (Y_LOWERBOUND - 5), atBar[i].prediction_history[day_nr], 0, agent_color, context);
         atBarValue = i;
 
-        drawBarDay(barContext, i, day_nr, atBar[i].score);
+        drawBarDay(barContext, i, day_nr, atBar[i].score, 0, atBar[i]);
     }
 
     // atHome above atBar
     for (let j = 0; j < atHome.length; j++) {
-        drawLine(0, (atBarValue + 2 + j) * (-4) + (Y_LOWERBOUND - 5), atHome[j].prediction_history[day_nr], 0, "#000000", context);
+        agent_color = getAgentColor(atHome[j]);
+        drawLine(0, (atBarValue + 2 + j) * (-4) + (Y_LOWERBOUND - 5), atHome[j].prediction_history[day_nr], 0, agent_color, context);
 
-        drawBarDay(barContext, j, day_nr, atHome[j].score, 110);
+        drawBarDay(barContext, j, day_nr, atHome[j].score, 110, atHome[j]);
     }
 
     // horizontal capacity line
@@ -465,7 +531,7 @@ function drawBar(context) {
     drawLine(1, groundHeight + wallHeight, barWidth, 0, "#000000", context);
 }
 
-function drawBarDay(context, attendent_nr, day_nr, score, home_x_shift = 0) {
+function drawBarDay(context, attendent_nr, day_nr, score, home_x_shift = 0, agent = null) {
     let barLineSize = 10;
     let groundHeight = 200 * CanvasLowerBoundProportion;
     let opacity = score / (day_nr + 1) * 100;
@@ -473,6 +539,10 @@ function drawBarDay(context, attendent_nr, day_nr, score, home_x_shift = 0) {
         opacity = 5;
     }
     drawPoint(home_x_shift + 8 + X_SCALE * 5 * (attendent_nr % (barLineSize)), groundHeight - 9 - 12 * Math.floor(attendent_nr / (barLineSize)), `rgba(0,0,0,${opacity}%)`, context, 6);
+
+    if (agent.is_person) {
+        drawPoint(home_x_shift + 8 + 1 + X_SCALE * 5 * (attendent_nr % (barLineSize)), groundHeight - 9 - 12 * Math.floor(attendent_nr / (barLineSize)) - 3, `rgba(0,0,0,${opacity}%)`, context, 4);
+    }
 }
 
 function drawPoint(x, y, color, context = ctx, size = 4) {

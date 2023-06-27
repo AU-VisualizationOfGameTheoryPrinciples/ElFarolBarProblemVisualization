@@ -25,11 +25,11 @@ function getHintText(getHintFunc) {
     return hintText;
 }
 
-function getValueById(id){
+function getValueById(id) {
     return document.getElementById(id).value;
 }
 
-function setValueById(id, value){
+function setValueById(id, value) {
     if (typeof value == "boolean") {
         document.querySelector(`#${id}`).checked = value;
     } else {
@@ -37,7 +37,7 @@ function setValueById(id, value){
     }
 }
 
-function checkIfDefaultValue(elem, defaultValue){
+function checkIfDefaultValue(elem, defaultValue) {
     elem = Number.parseInt(elem);
     return Number.isInteger(elem) ? elem : defaultValue;
 }
@@ -47,4 +47,15 @@ function getFlag(name) {
     return flag;
 }
 
-export { getEntries, get, getHintText, getValueById, setValueById, checkIfDefaultValue, getFlag };
+function hasSubmittedValues() {
+    let name;
+    name = (new RegExp('[?&]')).exec(location.search);
+    if (name == null || typeof name[0] == "undefined") {
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+
+export { getEntries, get, getHintText, getValueById, setValueById, checkIfDefaultValue, getFlag, hasSubmittedValues };

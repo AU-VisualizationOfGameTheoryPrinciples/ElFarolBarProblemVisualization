@@ -233,11 +233,11 @@ th {
 }
 
 /* change appearance for read-only fields */
-#mem_attendances,
+/* #mem_attendances,
 .player_predictions input[type=number] {
     -moz-appearance: textfield;
     appearance: textfield;
-}
+} */
 
 #prediction_tab>.hide {
     visibility: hidden;
@@ -248,6 +248,17 @@ th {
     padding: 1% 1.5%;
     min-height: 3em;
     min-width: 3em;
+}
+
+#days_list > canvas {
+	height: 100%;
+}
+
+#days_list {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: space-evenly;
 }
 
 /* #captions {
