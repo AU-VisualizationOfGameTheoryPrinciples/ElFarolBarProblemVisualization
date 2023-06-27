@@ -306,6 +306,7 @@ function simulateDays() {
             if (getValueById("prediction")) {
                 simulatePlayerPrediction();
                 showAttendancesInMemory();
+                current_iteration.textContent = ++current_day;
                 if (current_day >= TOTAL_DAYS) {
                     // TODO: implement stop for Days under given max value?
                     drawSummaryGraph();
@@ -330,16 +331,13 @@ function simulatePlayerPrediction() {
     player_predictions.value = predText;
 
     simulateDay(current_day);
-
-    current_iteration.textContent = ++current_day;
-
 }
 
 function showAttendancesInMemory() {
-    let length = current_day < memory_size ? current_day : memory_size;
+    let length = current_day < memory_size ? current_day+1 : memory_size;
     let attendancesText = "";
     for (let i = 0; i < length; i++) {
-        let attendance = " " + -(i + 1) + ": " + attendance_history[i];
+        let attendance = " " + -(i + 1) + ": " + attendance_history[current_day-i];
         // alert(attendance)
         attendancesText += attendance;
     }
