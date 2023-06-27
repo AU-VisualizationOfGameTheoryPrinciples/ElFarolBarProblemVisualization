@@ -306,11 +306,11 @@ function simulateDays() {
             if (getValueById("prediction")) {
                 simulatePlayerPrediction();
                 showAttendancesInMemory();
+                drawSummaryGraph(current_day);
+                // if (current_day >= TOTAL_DAYS) {
+                // TODO: implement stop for Days under given max value?
+                // }
                 current_iteration.textContent = ++current_day;
-                if (current_day >= TOTAL_DAYS) {
-                    // TODO: implement stop for Days under given max value?
-                    drawSummaryGraph();
-                }
             } else {
                 alert("No value!");
             }
@@ -318,8 +318,8 @@ function simulateDays() {
     } else {
         for (let i = 0; i < TOTAL_DAYS; i++) {
             simulateDay(i);
+            drawSummaryGraph(i);
         }
-        drawSummaryGraph();
     }
 }
 
@@ -334,10 +334,10 @@ function simulatePlayerPrediction() {
 }
 
 function showAttendancesInMemory() {
-    let length = current_day < memory_size ? current_day+1 : memory_size;
+    let length = current_day < memory_size ? current_day + 1 : memory_size;
     let attendancesText = "";
     for (let i = 0; i < length; i++) {
-        let attendance = " " + -(i + 1) + ": " + attendance_history[current_day-i];
+        let attendance = " " + -(i + 1) + ": " + attendance_history[current_day - i];
         // alert(attendance)
         attendancesText += attendance;
     }
@@ -476,13 +476,15 @@ function drawPredictionDay(day_nr) {
     drawLine(attendance_history[day_nr], Y_LOWERBOUND, 0, -Y_LOWERBOUND, color_map[day_nr]);
 }
 
-function drawSummaryGraph() {
+function drawSummaryGraph(i) {
     // attendance over time
-    drawLine(0, days_summary_graph_lowerbound, 5, -attendance_history[0], "#FF0000", days_summary_graph_canvas);
-    for (let i = 0; i < TOTAL_DAYS; i++) {
-        drawPoint((i + 1) * X_SCALE * 5 - 2, days_summary_graph_lowerbound - attendance_history[i] - 2, "#000000", days_summary_graph_canvas);
-        drawLine((i + 1) * 5, days_summary_graph_lowerbound - attendance_history[i], 5, attendance_history[i] - attendance_history[i + 1], "#FF0000", days_summary_graph_canvas);
+    if (i == 0) {
+        drawLine(0, days_summary_graph_lowerbound, 5, -attendance_history[0], "#FF0000", days_summary_graph_canvas);
     }
+    drawPoint((i + 1) * X_SCALE * 5 - 2, days_summary_graph_lowerbound - attendance_history[i] - 2, "#000000", days_summary_graph_canvas);
+    // draw prior line to the point
+    i = i - 1;
+    drawLine((i + 1) * 5, days_summary_graph_lowerbound - attendance_history[i], 5, attendance_history[i] - attendance_history[i + 1], "#FF0000", days_summary_graph_canvas);
 }
 
 function getAgentColor(agent) {
