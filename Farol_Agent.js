@@ -94,14 +94,27 @@ for (let i = 0; i < rows; i++) {
     }
 }
 
-// TODO: setup color_map and web design for more than 5 iterations
-var color_map = new Array(TOTAL_DAYS);
-color_map[0] = "#FF0000";
-color_map[1] = "#00FF00";
-color_map[2] = "#0000FF";
-color_map[3] = "#AA0000";
-color_map[4] = "#00AA00";
-color_map[5] = "#0000AA";
+var color_map_length = TOTAL_DAYS > 10 ? TOTAL_DAYS : 10;
+var color_map = setupColorMap();
+
+function setupColorMap() {
+    let colorMap = new Array(color_map_length);
+
+    for(let i = 0; i < color_map_length;) {
+        if(i<10){
+            colorMap[i] = `rgb(${100-10*i}%, 0%, 0%)`;
+            colorMap[i+1] = `rgb(0%, ${100-10*i}%, 0%)`;
+            colorMap[i+2] = `rgb(0%, 0%, ${100-10*i}%)`;
+        } else {
+            colorMap[i] = `rgb(100%, ${i}%, ${i}%)`;
+            colorMap[i+1] = `rgb(${i}%, 100%, ${i})%`;
+            colorMap[i+2] = `rgb(${i}%, ${i}%, 100%)`;
+        }
+        i = i + 3;
+    }
+
+    return colorMap;
+}
 
 class Farol_Agent {
     id;

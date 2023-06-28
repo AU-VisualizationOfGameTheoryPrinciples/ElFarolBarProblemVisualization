@@ -196,6 +196,8 @@ th {
     width: fit-content;
     padding: 0 2%;
     align-self: center;
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .days_summary {
@@ -250,15 +252,15 @@ th {
     min-width: 3em;
 }
 
-#days_list > canvas {
-	height: 100%;
+#days_list>canvas {
+    height: 100%;
 }
 
 #days_list {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	justify-content: space-evenly;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
 }
 
 /* #captions {
