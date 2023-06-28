@@ -1,14 +1,10 @@
 var helpInfo = document.getElementById('help');
+var isInfoHidden;
 if(helpInfo){
     helpInfo.addEventListener("click", () => hideInfo(true));
+    isInfoHidden = getFlag(localStorage['isInfoHidden']);
+    hideInfo(false);
 }
-var isInfoHidden;
-window.onload = () => {
-    if(helpInfo){
-        isInfoHidden = getFlag(localStorage['isInfoHidden']);
-        hideInfo(false);
-    }
-} 
 
 function getFlag(flag) {
     if(flag === 'true') {
