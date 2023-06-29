@@ -27,14 +27,14 @@ function init() {
         }
     }
 
-    showSummary();
+    showSummary("days_summary", countGoodDays, countBadDays, iterations);
 
     console.log("Initialized!")
 }
 
-function showSummary() {
-    var summary_elem = document.getElementById("days_summary");
-    var summary_text = document.createElement("p");
+function showSummary(id, countGoodDays, countBadDays, iterations, elementToUse = null) {
+    var summary_elem = document.getElementById(id);
+    var summary_text = elementToUse ? elementToUse : document.createElement("p");
     summary_text.innerText = countGoodDays + " good days and " + countBadDays + " bad days out of " + iterations + " days watched (" + Number.parseInt(countGoodDays/iterations*100) + "%).";
     summary_elem.append(summary_text);
 }
@@ -151,4 +151,4 @@ function addValue(elementName, className, value, row) {
     return elem;
 }
 
-export {get, setValueById, getValueById, checkIfDefaultValue};
+export {showSummary};

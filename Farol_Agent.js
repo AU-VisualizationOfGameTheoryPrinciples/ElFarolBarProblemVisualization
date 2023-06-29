@@ -1,6 +1,7 @@
 import { PriorityQueue } from "./PriorityQueue.js";
 import { get, getValueById, setValueById, checkIfDefaultValue, getFlag, hasSubmittedValues } from "./manageFormValues.js";
 import { hideElement } from "./hideScreenElements.js";
+import { showSummary } from "./calcUtility.js";
 
 /*
     ==================
@@ -81,6 +82,8 @@ var attendance_history = new Array(AMOUNT_OF_PEOPLE);
 attendance_history.fill(0);
 var agents = new Array(AMOUNT_OF_PEOPLE);
 
+var countGoodDays = 0;
+var countBadDays = 0;
 var attendees_map_per_day = []; // per day?
 var rows = 2; // bar: 0, home: 1
 var atBar = [];
@@ -275,7 +278,7 @@ function differenceToAttendance(prediction, attendance) {
 var canvas = document.getElementById("attendance_graph");
 var ctx = canvas.getContext("2d");
 
-var days_summary = document.getElementById("days_summary");
+var days_summary_attendances = document.getElementById("days_summary_attendances");
 
 var days_summary_graph = document.getElementById("days_summary_graph");
 var days_summary_graph_size = 150;
@@ -331,9 +334,9 @@ function simulateDays() {
             }
         });
     } else {
-        for (let i = 0; i < TOTAL_DAYS; i++) {
-            simulateDay(i);
-            drawSummaryGraph(i);
+        for (current_day; current_day < TOTAL_DAYS; current_day++) {
+            simulateDay(current_day);
+            drawSummaryGraph(current_day);
         }
     }
 }
@@ -375,6 +378,8 @@ function simulateDay(i) {
 
     drawPredictionDay(i);
     manageOvercrowded(i);
+    showDayColor(i);
+    showSummary("days_summary", countGoodDays, countBadDays, current_day+1, document.getElementById("days_summary_text"));
 
     for (let k = 0; k < AGENTS_NR; k++) {
         agents[k].add_score(i);
@@ -407,13 +412,21 @@ function generateRandomAttendance(agents_nr = 0) {
 
 function manageOvercrowded(day_nr) {
     if (isOvercrowded(day_nr)) {
+        countBadDays++;
         showOvercrowded(day_nr);
         console.log("OVERCROWDED");
+    } else {
+        countGoodDays++;
     }
 }
 
 function showOvercrowded(day_nr) {
-    setText(canvas.width / 2, canvas.height / 4 + day_nr * 20, day_nr + ": OVERCROWDED", "#FF0000");
+    setText(4 * canvas.width / 6, canvas.height / 6 + day_nr * 20, day_nr + ": OVERCROWDED", "#FF0000");
+    setText(5, 200 * CanvasLowerBoundProportion - 30,"OVERCROWDED", "#FF0000", barContext, "0.8em");
+}
+
+function showDayColor(day_nr) {
+    setText(canvas.width / 2, canvas.height / 6 + day_nr * 20, "day" + day_nr, color_map[day_nr]);
 }
 
 // predictions of all days
@@ -440,7 +453,7 @@ function addDay(day_nr, attendance, color) {
     elem.append("day" + day_nr + ": " + attendance);
     elem.style.color = "#FFFFFF";
     elem.style.padding = "1em";
-    days_summary.append(elem);
+    days_summary_attendances.append(elem);
     // var elem = document.createElement(elementName)
     // elem.setAttribute("class", className);
     // elem.append(value);
@@ -573,8 +586,8 @@ function drawLine(x, y, dX, dY, color, context = ctx) {
     context.stroke();
 }
 
-function setText(x, y, content, color, context = ctx) {
-    context.font = "1rem Arial";
+function setText(x, y, content, color, context = ctx, fontSize = "1em") {
+    context.font = `${fontSize} Arial`;
     context.fillStyle = color;
     context.fillText(content, x, y);
     // ctx.fillText(content, x, y);
