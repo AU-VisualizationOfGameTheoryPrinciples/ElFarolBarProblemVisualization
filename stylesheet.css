@@ -87,6 +87,9 @@ body {
         top: 16%;
         left: 48%;
     }
+    .attendance-graph {
+        width: 100%;
+    }
 }
 
 @media (max-width: 640px) {

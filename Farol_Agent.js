@@ -299,6 +299,8 @@ if (hasSubmittedValues()) {
     // console.log("score:" + testAgent.score);
     setupAgents(STRATEGIES_COUNT, MEMORY_SIZE);
     simulateDays();
+} else {
+    hideElement(document.getElementById("graphs"), true);
 }
 
 function simulateDays() {
