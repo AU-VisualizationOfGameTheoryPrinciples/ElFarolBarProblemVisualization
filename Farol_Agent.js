@@ -315,7 +315,7 @@ function simulateDays() {
     // // capacity line
     // drawLine(60, Y_LOWERBOUND, 0, -Y_LOWERBOUND, "#000000");
 
-    days_summary_graph_canvas = setupCanvas(0, days_summary_graph_lowerbound - OVERCROWDING_THRESHOLD, 100, 0, true, days_summary_graph, days_summary_graph_size, days_summary_graph_size);
+    days_summary_graph_canvas = setupCanvas(0, days_summary_graph_lowerbound - OVERCROWDING_THRESHOLD, 300, 0, true, days_summary_graph, days_summary_graph_size*2, days_summary_graph_size, days_summary_graph_size*2);
 
     if (has_player_agent) {
         current_iteration.textContent = current_day;
