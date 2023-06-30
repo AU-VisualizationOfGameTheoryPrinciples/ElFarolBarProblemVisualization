@@ -19,8 +19,19 @@
     <h1 class="title">🍺 The El Farol Bar Problem! 🍹</h1>
     <button id="help" class="help"><img src="img/q_mark_icon.png" alt="?" style="width: 1rem; height: auto;"></button>
     <div id="intro" class="introduction site_introduction" style="display: none;">
-        <h3>Help</h3>
-        <img alt="help">
+        <h3>El Farol Bar Problem - Agent Visualization</h3>
+        <p>This application simulates the El Farol Bar Problem with agents using a set of strategies based on the past
+            bar attendances in their memory.</p>
+        <p>A strategy is formed simular to the NetLogo model with random weights from -1 to 1 for the past attendances.
+            By weighting the attendances the agent makes a prediction on the current bar attendance. If their prediction
+            is under the bar capacity (overcrowding-threshold; by default 60), the agent decides to go to the bar, otherwise they
+            stay at home. When all agents decided, everyone checks the errors of their strategies to the actual attendance
+            and use the strategy with the lowest error for the next prediction.</p>
+        <div>
+            <img src="img/bar_day_prediction_desc.png" alt="bar day prediction description image">
+            <img src="img/bar_day_attendance_desc.png" alt="bar day attendance description image">
+            <img src="img/all_day_predictions_desc.png" alt="all day predictions description image">
+        </div>
     </div>
     <div id="main">
         <form id="form" method="get" action="">
@@ -59,7 +70,9 @@
             <div class="days_summary">
                 <div id="days_summary_attendances" style="padding: 5%;"></div>
                 <canvas id="days_summary_graph" style="width: fit-content;"></canvas>
-                <div id="days_summary" style="padding: 5%;"><p id="days_summary_text"></p></div>
+                <div id="days_summary" style="padding: 5%;">
+                    <p id="days_summary_text"></p>
+                </div>
             </div>
             <h2>People at the bar per day</h2>
             <div id="days_list">
