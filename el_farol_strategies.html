@@ -24,8 +24,10 @@
             bar attendances in their memory.</p>
         <p>A strategy is formed simular to the NetLogo model with random weights from -1 to 1 for the past attendances.
             By weighting the attendances the agent makes a prediction on the current bar attendance. If their prediction
-            is under the bar capacity (overcrowding-threshold; by default 60), the agent decides to go to the bar, otherwise they
-            stay at home. When all agents decided, everyone checks the errors of their strategies to the actual attendance
+            is under the bar capacity (overcrowding-threshold; by default 60), the agent decides to go to the bar,
+            otherwise they
+            stay at home. When all agents decided, everyone checks the errors of their strategies to the actual
+            attendance
             and use the strategy with the lowest error for the next prediction.</p>
         <div>
             <img src="img/bar_day_prediction_desc.png" alt="bar day prediction description image">
@@ -62,13 +64,28 @@
             <button id="prediction_button" class="submit-button">Predict</button>
             <div class="player_predictions">
                 <label for="player_predictions">Predictions:</label>
-                <input type="text" id="player_predictions" name="player_predictions" disabled>
+                <textarea id="player_predictions" name="player_predictions" disabled></textarea>
+                <label for="player_errors">Errors:</label>
+                <textarea id="player_errors" name="player_errors" disabled></textarea>
             </div>
+        </div>
+        <div id="ranking">
+            <button id="ranking_heading"><h2>Agent Ranking</h2></button>
+            <table id="results">
+                <tr>
+                    <th>Ranking</th>
+                    <th>Agent Number</th>
+                    <th>Name</th>
+                    <th>Score</th>
+                    <th>Current Prediction Error Value</th>
+                </tr>
+            </table>
         </div>
         <div id="graphs">
             <h2>Attendances at the bar for all days</h2>
             <div class="days_summary">
-                <div id="days_summary_attendances" style="padding: 5%;"></div>
+                <div id="days_summary_attendances" style="padding: 5%; display: grid;
+                grid-template-columns: auto auto auto auto auto"></div>
                 <canvas id="days_summary_graph" style="width: fit-content;"></canvas>
                 <div id="days_summary" style="padding: 5%;">
                     <p id="days_summary_text"></p>

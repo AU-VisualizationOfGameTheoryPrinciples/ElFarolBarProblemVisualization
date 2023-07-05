@@ -1,3 +1,4 @@
+import { addValue, showSummary } from "./Summary_Util.js";
 import {get, getValueById, setValueById, checkIfDefaultValue} from "./manageFormValues.js"
 
 window.onload = init;
@@ -30,13 +31,6 @@ function init() {
     showSummary("days_summary", countGoodDays, countBadDays, iterations);
 
     console.log("Initialized!")
-}
-
-function showSummary(id, countGoodDays, countBadDays, iterations, elementToUse = null) {
-    var summary_elem = document.getElementById(id);
-    var summary_text = elementToUse ? elementToUse : document.createElement("p");
-    summary_text.innerText = countGoodDays + " good days and " + countBadDays + " bad days out of " + iterations + " days watched (" + Number.parseInt(countGoodDays/iterations*100) + "%).";
-    summary_elem.append(summary_text);
 }
 
 function adaptProbability(prob){
@@ -142,13 +136,3 @@ function calcUtility() {
         return case_util * bar_filled + home_util * (people_count-bar_filled);
     }
 }
-
-function addValue(elementName, className, value, row) {
-    var elem = document.createElement(elementName)
-    elem.setAttribute("class", className);
-    elem.append(value);
-    row.append(elem);
-    return elem;
-}
-
-export {showSummary};

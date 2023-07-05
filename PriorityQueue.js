@@ -83,7 +83,7 @@ class PriorityQueue {
 			this.swap(this.getParentIndex(index), index);
 			index = this.getParentIndex(index);
 		}
-        console.log("peek: " + this.peek().getValue());
+        // console.log("peek: " + this.peek().getValue());
 	}
 
 	heapifyDown() {
@@ -101,7 +101,7 @@ class PriorityQueue {
 			index = smallerChildIndex;
 		}
 
-        console.log("peek: " + this.peek().getValue());
+        // console.log("peek: " + this.peek().getValue());
 	}
 
 	forEach(func) {

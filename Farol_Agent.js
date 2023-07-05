@@ -1,7 +1,7 @@
 import { PriorityQueue } from "./PriorityQueue.js";
 import { get, getValueById, setValueById, checkIfDefaultValue, getFlag, hasSubmittedValues } from "./manageFormValues.js";
 import { hideElement } from "./hideScreenElements.js";
-import { showSummary } from "./calcUtility.js";
+import { addValue, showSummary } from "./Summary_Util.js";
 
 /*
     ==================
@@ -21,6 +21,7 @@ var prediction_tab = document.getElementById("prediction_tab");
 // prediction_tab.style.visibility = "hidden";
 var player_prediction;
 var player_predictions;
+var player_errors;
 var attendences_in_memory;
 var current_iteration;
 var prediction_button;
@@ -52,6 +53,7 @@ hidePredictionTab();
 if (has_player_agent) {
     player_prediction = getValueById("prediction");
     player_predictions = document.getElementById("player_predictions");
+    player_errors = document.getElementById("player_errors");
     attendences_in_memory = document.getElementById("mem_attendances");
     current_iteration = document.getElementById("day_nr");
     prediction_button = document.getElementById("prediction_button");
@@ -81,6 +83,7 @@ const STRATEGY_UTIL_BOOST = 1;
 var attendance_history = new Array(AMOUNT_OF_PEOPLE);
 attendance_history.fill(0);
 var agents = new Array(AMOUNT_OF_PEOPLE);
+var ranking = new Array(AMOUNT_OF_PEOPLE);
 
 var countGoodDays = 0;
 var countBadDays = 0;
@@ -99,6 +102,7 @@ for (let i = 0; i < rows; i++) {
 
 var color_map_length = TOTAL_DAYS > 10 ? TOTAL_DAYS : 10;
 var color_map = setupColorMap();
+var name_map = setupNames();
 
 function setupColorMap() {
     let colorMap = new Array(color_map_length);
@@ -119,6 +123,16 @@ function setupColorMap() {
     return colorMap;
 }
 
+function setupNames() {
+    let nameMap = new Array(AGENTS_NR);
+    nameMap.fill("Rando");
+    if(has_player_agent){
+        nameMap[0] = "You";
+    }
+
+    return nameMap;
+}
+
 class Farol_Agent {
     id;
     memory_size;
@@ -127,6 +141,7 @@ class Farol_Agent {
     first_strategy;
     is_attending; // boolean 
     prediction_history;
+    error_history;
     score;  // score how accurate the predictions are
     is_person; // to distinguish between computer and person agents (for predictions)
 
@@ -167,14 +182,14 @@ class Farol_Agent {
 
     rank_strategies(day_nr, attendance_history) {
         // set value of all strategies based on current and last days of memory-size
-        console.log("strategies: " + this.strategies_set.getHeap().length);
+        // console.log("strategies: " + this.strategies_set.getHeap().length);
         this.strategies_set.getHeap().forEach(element => {
-            console.log(element);
+            // console.log(element);
             // let value = element.getValue();
             // console.log("element: " + element + " value: " + value);
             let value = 0;
             value += element.determine_error(day_nr, this.memory_size, attendance_history);
-            console.log("added value: " + value);
+            // console.log("added value: " + value);
             element.setValue(value);
         });
 
@@ -187,7 +202,7 @@ class Farol_Agent {
 
     decide_attending(day_nr, attendance_history) {
         let prediction = this.predict_attendance(day_nr, attendance_history);
-        console.log("--- predict" + this.id + " [" + day_nr + "]: " + prediction);
+        // console.log("--- predict" + this.id + " [" + day_nr + "]: " + prediction);
         this.is_attending = prediction <= OVERCROWDING_THRESHOLD;
         // attendees per day?
         // attendees_map[this.id] = this.is_attending;
@@ -198,8 +213,23 @@ class Farol_Agent {
     add_score(day_nr) {
         if (this.is_attending) {
             this.score = isOvercrowded(day_nr) ? this.score - 1 : this.score + 1;
-            // TODO: add more score if prediction is close to actual attendance?
         }
+        // TODO: add more score if prediction is close to actual attendance?
+        let error = this.get_error_value(day_nr, attendance_history);
+        let addValue = error <= 1 ? (error == 0 ? 1.25 : 1.5) : error;
+        this.score += 1/2 * 1/addValue;
+    }
+
+    get_error_value(day_nr) {
+        return differenceToAttendance(this.get_prediction(day_nr), attendance_history[day_nr]);
+    }
+
+    get_prediction(day_nr) {
+        return this.prediction_history[day_nr];
+    }
+
+    getValue() {
+        return this.score;
     }
 }
 
@@ -209,7 +239,7 @@ class Farol_Strategy {
     error_value;
 
     constructor(memory_size, first_strategy) {
-        console.log("const")
+        // console.log("const")
         this.weights_list = new Array(memory_size);
         this.weighting_attendances_func = this.generate_func(memory_size, first_strategy);
         this.error_value = 0;
@@ -227,12 +257,12 @@ class Farol_Strategy {
                 let attendance = attendance_history[day_nr - (i + 1)];
                 attendance = (attendance && attendance > 0) ? attendance : 0;
                 prediction += (attendance * weights_list[i]);
-                console.log("i -> " + (-1 * (i + 1)) + " -> " + prediction);
+                // console.log("i -> " + (-1 * (i + 1)) + " -> " + prediction);
             }
             prediction = Math.round(prediction + first_strategy);
             prediction = considerPredictionBoundaries(prediction);
-            console.log("first:" + first_strategy);
-            console.log("pred:" + prediction);
+            // console.log("first:" + first_strategy);
+            // console.log("pred:" + prediction);
             return prediction;
         }
     }
@@ -242,7 +272,7 @@ class Farol_Strategy {
         let length = day_nr < memory_size ? day_nr + 1 : memory_size + 1;
         for (let i = 0; i < length; i++) {
             error += differenceToAttendance(this.weighting_attendances_func(day_nr - i, this.weights_list, attendance_history), attendance_history[day_nr - i]);
-            console.log("err:" + error);
+            // console.log("err:" + error);
         }
         return error;
     }
@@ -287,6 +317,11 @@ var days_summary_graph_canvas;
 var barContext;
 
 var days_list = document.getElementById("days_list");
+var hasRanking = true;
+
+let rankingHeading = document.getElementById("ranking_heading");
+let rankingTab = document.getElementById("results");
+rankingHeading.addEventListener("click", () => {hideElement(rankingTab, hasRanking); hasRanking = !hasRanking;});
 
 /*
     ===============
@@ -320,6 +355,7 @@ function simulateDays() {
     if (has_player_agent) {
         current_iteration.textContent = current_day;
         player_predictions.value = "";
+        player_errors.value = "";
         prediction_button.addEventListener("click", () => {
             if (getValueById("prediction")) {
                 simulatePlayerPrediction();
@@ -349,6 +385,10 @@ function simulatePlayerPrediction() {
     player_predictions.value = predText;
 
     simulateDay(current_day);
+
+    let errorText = agents[0].get_error_value(current_day);
+    errorText = current_day == 0 ? errorText : "; " + errorText;
+    player_errors.value += errorText;
 }
 
 function showAttendancesInMemory() {
@@ -372,22 +412,25 @@ function simulateDay(i) {
         agents[j].decide_attending(i, attendance_history);
     }
 
-    console.log("-- ah" + i + ": " + attendance_history[i]);
+    // console.log("-- ah" + i + ": " + attendance_history[i]);
     attendance_history[i] += generateRandomAttendance(AGENTS_NR);
-    console.log("--- ah" + i + ": " + attendance_history[i]);
+    // console.log("--- ah" + i + ": " + attendance_history[i]);
 
     drawPredictionDay(i);
     manageOvercrowded(i);
     showDayColor(i);
     showSummary("days_summary", countGoodDays, countBadDays, current_day+1, document.getElementById("days_summary_text"));
-
+    
+    // TODO: check if Priority Queue needs to be changed to a sort tree / list
     for (let k = 0; k < AGENTS_NR; k++) {
         agents[k].add_score(i);
-        console.log("score" + k + ": " + agents[k].score);
+        // console.log("score" + k + ": " + agents[k].score);
         agents[k].rank_strategies(i, attendance_history);
+        console.log(k);
         agents[k].strategies_set.print();
     }
-
+    showRanking();
+    
     drawBar(barContext);
     drawMultiCanvasDay(multiCanvasContext, i);
 }
@@ -481,7 +524,7 @@ function setupCanvas(x = OVERCROWDING_THRESHOLD, y = Y_LOWERBOUND, dX = 0, dY = 
         drawLine(x, y, dX, dY, "#000000", canvasContext);
     }
 
-    console.log("predCanv: " + predefinedCanvas);
+    // console.log("predCanv: " + predefinedCanvas);
     if (!predefinedCanvas) {
         days_list.append(canvas);
     }
@@ -492,6 +535,8 @@ function setupAgents(strategies_nr, memory_size) {
     for (let i = 0; i < AGENTS_NR; i++) {
         agents[i] = new Farol_Agent(i + 1, strategies_nr, memory_size);
         agents[i].set_is_person_flag(false);
+        // ranking.add(agents[i]);
+        ranking.push(agents[i]);
     }
     if (has_player_agent) {
         agents[0].set_is_person_flag(true);
@@ -562,9 +607,11 @@ function drawBar(context) {
 function drawBarDay(context, attendent_nr, day_nr, score, home_x_shift = 0, agent = null) {
     let barLineSize = 10;
     let groundHeight = 200 * CanvasLowerBoundProportion;
-    let opacity = score / (day_nr + 1) * 100;
+    let opacity = Math.floor(score) / (day_nr + 1) * 100;
     if (opacity <= 5) {
         opacity = 5;
+    } else if (opacity >= 100) {
+        opacity = 100;
     }
     drawPoint(home_x_shift + 8 + X_SCALE * 5 * (attendent_nr % (barLineSize)), groundHeight - 9 - 12 * Math.floor(attendent_nr / (barLineSize)), `rgba(0,0,0,${opacity}%)`, context, 6);
 
@@ -592,4 +639,43 @@ function setText(x, y, content, color, context = ctx, fontSize = "1em") {
     context.fillText(content, x, y);
     // ctx.fillText(content, x, y);
     // ctx.strokeText(content, x, y);
+}
+
+function rankAgents() {
+    ranking.sort(function (x,y) {
+        let a = x.getValue();
+        let b = y.getValue();
+        return b-a;
+    })
+}
+
+function showRanking() {
+    // ranking.heapifyDown();
+    // ranking.print();
+    rankAgents();
+    let rankingList = ranking;
+    var row = document.createElement("tr");
+    addValue("th", null, "Day " + current_day, row);
+    addValue("th", "", "", row);
+    addValue("th", "", "", row);
+    addValue("th", "", "", row);
+    addValue("th", "", "", row);
+    document.getElementById("results").append(row);
+
+    for(let i=1; i<=3; i++){
+        let agent = rankingList[i-1];
+        var row = document.createElement("tr");
+        addValue("td", "ranking_value", "# " + i, row);
+        addValue("td", "id_value", agent.id, row);
+        let agentNameWeight = agent.id == 1 ? "th" : "td";
+        addValue(agentNameWeight, "name_value", name_map[agent.id-1], row);
+        addValue("td", "score_value", Math.round(agent.score*100)/100, row);
+        // TODO:  check:
+        //  - save last strategy used because of strategy ranking and score addition happen at the same time?
+        //  - change score calculation?
+        addValue("td", "error_value", "Prediction: " + agent.get_prediction(current_day) + "; Error:" + agent.get_error_value(current_day), row);
+        document.getElementById("results").append(row);
+    }
+
+    // ranking.print();
 }
