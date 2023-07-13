@@ -16,9 +16,8 @@ var has_player_agent_elem = document.getElementById("has_player_agent");
 
 var has_player_agent = getFlag("has_player_agent");
 
-// TODO: add hide/show toggle for predictions
 var prediction_tab = document.getElementById("prediction_tab");
-// prediction_tab.style.visibility = "hidden";
+
 var player_prediction;
 var player_predictions;
 var player_errors;
@@ -42,12 +41,8 @@ function hidePredictionTab() {
     }
 
     hideElement(prediction_tab, isPredictionTabHidden);
-    // prediction_tab.classList.toggle('hide');
-    // prediction_tab.style.visibility = "hidden";
 }
 
-// TODO: implement player interaction as one agent predicting per day
-// prediction_tab.style.visibility = "show";
 doesToggling = false;
 hidePredictionTab();
 if (has_player_agent) {
@@ -497,11 +492,6 @@ function addDay(day_nr, attendance, color) {
     elem.style.color = "#FFFFFF";
     elem.style.padding = "1em";
     days_summary_attendances.append(elem);
-    // var elem = document.createElement(elementName)
-    // elem.setAttribute("class", className);
-    // elem.append(value);
-    // row.append(elem);
-    // return elem;
 }
 
 function setupPredefinedCanvas(predefinedCanvas) {
@@ -561,7 +551,6 @@ function drawSummaryGraph(i) {
 }
 
 function getAgentColor(agent) {
-    // TODO: check and implement change to player agent
     let color = (agent.is_person == true) ? "#FF0000" : "#000000";
     return color;
 }
