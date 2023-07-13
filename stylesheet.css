@@ -33,6 +33,16 @@ body {
     padding-top: 1rem;
 }
 
+.introduction_container {
+    align-items: center;
+}
+
+.introduction_container > p {
+    max-width: 50rem;
+    justify-content: center;
+    text-align: center;
+}
+
 #form {
     display: flex;
     flex-direction: column;
@@ -125,7 +135,7 @@ th {
     margin-bottom: 1.5em;
     margin-top: -0.5em;
     margin-left: -0.5em;
-    margin-right: -0.5em;
+    margin-right: -0.25em;
     background-color: #ac2828;
     border-bottom: 5px solid #2a0303;
     -webkit-text-stroke-width: 1px;
@@ -251,8 +261,18 @@ th {
 .help {
     position: absolute;
     padding: 1% 1.5%;
-    min-height: 3em;
-    min-width: 3em;
+    min-height: 1em;
+    min-width: 1em;
+    display: flex;
+    flex-direction: column;
+    /* z-index: 3; */
+    align-items: center;
+    text-align: center;
+}
+
+.help_label {
+    font-weight: bold;
+    /* font-size: medium; */
 }
 
 #days_list>canvas {
