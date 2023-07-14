@@ -1,6 +1,7 @@
 import { PriorityQueue } from "./PriorityQueue.js";
 import { Farol_Variables } from "./Farol_Variables.js";
 import { drawAttendee } from "../view/drawResults.js";
+import { StrategyList } from "./StrategyList.js";
 
 const OVERCROWDING_THRESHOLD = Farol_Variables.OVERCROWDING_THRESHOLD;
 const AMOUNT_OF_PEOPLE = Farol_Variables.AMOUNT_OF_PEOPLE;
@@ -55,7 +56,8 @@ class Farol_Agent {
 
     set_random_strategies(nr) {
         // add random strategies to the list of strategies
-        this.strategies_set = new PriorityQueue();
+        // this.strategies_set = new PriorityQueue();
+        this.strategies_set = new StrategyList();
         for (let i = 0; i < nr; i++) {
             this.strategies_set.add(this.generate_random_strategy());
         }
@@ -74,11 +76,12 @@ class Farol_Agent {
             element.setValue(value);
         });
 
-        this.strategies_set.heapifyUp();
+        this.sort_strategies();
     }
 
     sort_strategies() {
-        // sort strategies based on significance value
+        // sort strategies based on error value
+        this.strategies_set.sortUp();
     }
 
     decide_attending(day_nr, attendance_history) {
