@@ -1,4 +1,3 @@
-import { PriorityQueue } from "./PriorityQueue.js";
 import { Farol_Variables } from "./Farol_Variables.js";
 import { drawAttendee } from "../view/drawResults.js";
 import { StrategyList } from "./StrategyList.js";
