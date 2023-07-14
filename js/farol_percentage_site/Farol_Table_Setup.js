@@ -1,5 +1,5 @@
-import { addValue, showSummary } from "./Summary_Util.js";
-import {get, getValueById, setValueById, checkIfDefaultValue} from "./manageFormValues.js"
+import { addValue, showSummary } from "../util/Summary_Util.js";
+import {get, getValueById, setValueById, checkIfDefaultValue} from "../util/manageFormValues.js"
 
 window.onload = init;
 
