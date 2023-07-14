@@ -17,6 +17,7 @@ var memory_size = get("memory_size");
 // var has_player_agent_elem = document.getElementById("has_player_agent");
 
 var has_player_agent = Farol_Variables.has_player_agent;
+console.log("has? " + has_player_agent);
 
 var prediction_tab = document.getElementById("prediction_tab");
 
@@ -158,6 +159,7 @@ function simulateDays() {
 function simulatePlayerPrediction() {
     let predText = player_predictions.value;
     player_prediction = getValueById("prediction");
+    Farol_Variables.player_prediction = player_prediction;
     predText = current_day == 0 ? predText : predText + "; ";
     predText += player_prediction;
     player_predictions.value = predText;

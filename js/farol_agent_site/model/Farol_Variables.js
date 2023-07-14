@@ -34,6 +34,7 @@ class Farol_Variables_Object {
     // - changing variables per day
     barContext;
     current_day;
+    player_prediction;
 }
 
 var strategies_count = get("strategies_count");
@@ -57,9 +58,8 @@ Farol_Variables.MIN_PREDICTION = 0;
 Farol_Variables.CanvasLowerBoundProportion = Farol_Variables.Y_LOWERBOUND / 500;
 
 Farol_Variables.color_map = setupColorMap(Farol_Variables.TOTAL_DAYS);
-Farol_Variables.name_map = setupNames(Farol_Variables.AGENTS_NR);
-
 Farol_Variables.has_player_agent = getFlag("has_player_agent");
+Farol_Variables.name_map = setupNames(Farol_Variables.AGENTS_NR, Farol_Variables.has_player_agent);
 
 var atBar = [];
 var atHome = [];

@@ -40,7 +40,7 @@ class Farol_Agent {
         let bestStrategy = this.strategies_set.peek();
         let prediction = bestStrategy.weighting_attendances_func(day_nr, bestStrategy.weights_list, attendance_history);
         if (this.is_person) {
-            prediction = player_prediction;
+            prediction = Farol_Variables.player_prediction;
         }
         return prediction;
     }

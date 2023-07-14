@@ -197,7 +197,7 @@ function showRanking() {
         var row = document.createElement("tr");
         addValue("td", "ranking_value", "# " + i, row);
         addValue("td", "id_value", agent.id, row);
-        let agentNameWeight = agent.id == 1 ? "th" : "td";
+        let agentNameWeight = (agent.id == 1 && Farol_Variables.has_player_agent) ? "th" : "td";
         addValue(agentNameWeight, "name_value", Farol_Variables.name_map[agent.id-1], row);
         addValue("td", "score_value", Math.round(agent.score*100)/100, row);
         // TODO:  check:
