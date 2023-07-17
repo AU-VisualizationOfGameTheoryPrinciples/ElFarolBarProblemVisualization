@@ -77,6 +77,8 @@ var ranking = Farol_Variables.ranking;
 
 var countGoodDays = 0;
 var countBadDays = 0;
+
+/* use attendees map per day when needed
 var attendees_map_per_day = []; // per day?
 var rows = 2; // bar: 0, home: 1
 var columns = TOTAL_DAYS;
@@ -87,6 +89,7 @@ for (let i = 0; i < rows; i++) {
         attendees_map_per_day[i][j] = 0;
     }
 }
+*/
 
 var attendance_graph_canvas = document.getElementById("attendance_graph");
 
@@ -104,12 +107,6 @@ var current_day;
     ===============
 */
 if (hasSubmittedValues()) {
-    // var testArray = [50, 30, 80];
-    // attendance_history = testArray;
-    // var testAgent = new Farol_Agent(1, 2, 4);
-    // var testAgent2 = new Farol_Agent(2, 2, 4);
-    // console.log(testAgent.first_strategy);
-    // console.log("score:" + testAgent.score);
     setupAgents(STRATEGIES_COUNT, MEMORY_SIZE);
     simulateDays();
 } else {
@@ -120,11 +117,6 @@ function simulateDays() {
     Farol_Variables.current_day = 0;
     current_day = Farol_Variables.current_day;
     setupPredefinedCanvas(attendance_graph_canvas);
-    // // graph line
-    // drawLine(0, Y_LOWERBOUND, 100, 0, "#000000");
-
-    // // capacity line
-    // drawLine(60, Y_LOWERBOUND, 0, -Y_LOWERBOUND, "#000000");
 
     setupDaysSummaryGraphCanvas();
 
@@ -165,7 +157,7 @@ function simulatePlayerPrediction() {
 
     simulateDay(current_day);
 
-    let errorText = agents[0].get_error_value(current_day);
+    let errorText = agents[Farol_Variables.player_agent_index].get_error_value(current_day);
     errorText = current_day == 0 ? errorText : "; " + errorText;
     player_errors.value += errorText;
 }
@@ -190,7 +182,7 @@ function simulateDay(i) {
 
     let multiCanvasContext = setupCanvas();
     Farol_Variables.barContext = setupCanvas(OVERCROWDING_THRESHOLD, 0, 0, -OVERCROWDING_THRESHOLD, false, null, 230, 200, 110);
-    // console.log("-- predict: " + testAgent.predict_attendance(i, attendance_history));
+
     for (let j = 0; j < AGENTS_NR; j++) {
         agents[j].decide_attending(i, attendance_history);
     }
@@ -212,16 +204,15 @@ function simulateDay(i) {
         agents[k].add_score(i);
         // console.log("score" + k + ": " + agents[k].score);
         agents[k].rank_strategies(i, attendance_history);
-        console.log(k);
-        agents[k].strategies_set.print();
+        // show agent strategies
+        // console.log(k);
+        // agents[k].strategies_set.print();
     }
     showRanking();
     
     drawBar(Farol_Variables.barContext);
     drawMultiCanvasDay(multiCanvasContext, i);
 }
-
-// console.log(testAgent.predict_attendance(1, attendance_history) == testAgent.predict_attendance(1, attendance_history));
 
 function generateRandomAttendance(agents_nr = 0) {
     return Math.floor(Math.random() * (AMOUNT_OF_PEOPLE - agents_nr));
@@ -245,6 +236,6 @@ function setupAgents(strategies_nr, memory_size) {
         ranking.push(agents[i]);
     }
     if (has_player_agent) {
-        agents[0].set_is_person_flag(true);
+        agents[Farol_Variables.player_agent_index].set_is_person_flag(true);
     }
 }
