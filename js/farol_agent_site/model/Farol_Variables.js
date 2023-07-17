@@ -19,6 +19,7 @@ class Farol_Variables_Object {
     name_map;
 
     has_player_agent;
+    player_agent_index;
 
     // canvas
     days_summary_graph;
@@ -56,6 +57,8 @@ Farol_Variables.Y_LOWERBOUND = 420;
 Farol_Variables.MAX_PREDICTION = Farol_Variables.AMOUNT_OF_PEOPLE;
 Farol_Variables.MIN_PREDICTION = 0;
 Farol_Variables.CanvasLowerBoundProportion = Farol_Variables.Y_LOWERBOUND / 500;
+
+Farol_Variables.player_agent_index = 0;
 
 Farol_Variables.color_map = setupColorMap(Farol_Variables.TOTAL_DAYS);
 Farol_Variables.has_player_agent = getFlag("has_player_agent");

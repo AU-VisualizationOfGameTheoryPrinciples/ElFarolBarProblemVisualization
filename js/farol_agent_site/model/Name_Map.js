@@ -1,3 +1,5 @@
+import { Farol_Variables } from "./Farol_Variables";
+
 var nameList = [
   "James",
   "Robert",
@@ -103,11 +105,9 @@ var nameList = [
 
 
 function setupNames(AGENTS_NR, has_player_agent) {
-    // let nameMap = new Array(AGENTS_NR);
-    // nameMap.fill("Rando");
     let nameMap = nameList.slice(0, AGENTS_NR);
     if (has_player_agent) {
-        nameMap[0] = "You";
+        nameMap[Farol_Variables.player_agent_index] = "You";
     }
 
     return nameMap;
