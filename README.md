@@ -1,6 +1,6 @@
 # El Farol Bar Problem - Visualization
 
-This Site should demonstrate the Santa Fe / El Farol Bar Problem with changeable parameters made by M-Gentes in cooperation with Prof. Dr. Oscar Lin.
+This Site should demonstrate the Santa Fe / El Farol Bar Problem with changeable parameters made by M-Gentes in cooperation with Professor Dr. Oscar Lin.
 
 The basic idea is that a specific number of
 people want to go to the Bar named "El Farol" on a specific day (like Thursday night). They can decide to go
