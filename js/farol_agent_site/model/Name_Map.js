@@ -1,4 +1,4 @@
-import { Farol_Variables } from "./Farol_Variables";
+import { Farol_Variables } from "./Farol_Variables.js";
 
 var nameList = [
   "James",
