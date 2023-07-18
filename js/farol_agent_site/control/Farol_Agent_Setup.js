@@ -62,14 +62,15 @@ if (has_player_agent) {
     last_player_score = 0;
 }
 
-const AMOUNT_OF_PEOPLE = 100;
-const OVERCROWDING_THRESHOLD = 60;
+const AMOUNT_OF_PEOPLE = Farol_Variables.AMOUNT_OF_PEOPLE;
+const OVERCROWDING_THRESHOLD = Farol_Variables.OVERCROWDING_THRESHOLD;
 
 const TOTAL_DAYS = Farol_Variables.TOTAL_DAYS;
 const STRATEGIES_COUNT = Farol_Variables.STRATEGIES_COUNT;
 const MEMORY_SIZE = Farol_Variables.MEMORY_SIZE;
 const AGENTS_NR = Farol_Variables.AGENTS_NR;
 
+setValueById("capacity", OVERCROWDING_THRESHOLD);
 setValueById("strategies_count", STRATEGIES_COUNT);
 setValueById("memory_size", MEMORY_SIZE);
 setValueById("days", TOTAL_DAYS);

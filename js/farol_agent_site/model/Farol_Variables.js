@@ -38,6 +38,7 @@ class Farol_Variables_Object {
     player_prediction;
 }
 
+var capacity = get("capacity");
 var strategies_count = get("strategies_count");
 var memory_size = get("memory_size");
 var days = get("days");
@@ -45,7 +46,9 @@ var days = get("days");
 var Farol_Variables;
 setupVariablesObject();
 Farol_Variables.AMOUNT_OF_PEOPLE = 100;
-Farol_Variables.OVERCROWDING_THRESHOLD = 60;
+let capacityDefaultValue = 60;
+let capacity_value = checkIfDefaultValue(capacity, capacityDefaultValue);
+Farol_Variables.OVERCROWDING_THRESHOLD = (capacity_value >= Farol_Variables.AMOUNT_OF_PEOPLE || capacity_value < 0) ? capacityDefaultValue : capacity_value;
 
 Farol_Variables.TOTAL_DAYS = checkIfDefaultValue(days, 3);
 Farol_Variables.STRATEGIES_COUNT = checkIfDefaultValue(strategies_count, 3);
