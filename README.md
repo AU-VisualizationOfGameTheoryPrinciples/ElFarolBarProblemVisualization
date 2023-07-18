@@ -13,3 +13,11 @@ capacity or threshold of the bar.
 ## Learning Objectives of the El Farol Bar Problem
 
 - explain the concept of [congestion games](https://en.wikipedia.org/wiki/Congestion_game)
+
+## Credits
+
+Sounds of Freesound.org were used on this application.
+
+- "Cheers, A.wav" by Moulaythami of Freesound.org
+- "Ui sounds - Shimmering success.wav" by NXRT of Freesound.org
+- "Wrong.mp3" by Raclure of Freesound.org

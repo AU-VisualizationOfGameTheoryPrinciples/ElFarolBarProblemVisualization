@@ -1,6 +1,7 @@
 import { Farol_Variables } from "./Farol_Variables.js";
 import { drawAttendee } from "../view/drawResults.js";
 import { StrategyList } from "./StrategyList.js";
+import { playSuitableSound } from "./Audio_Setup.js";
 
 const OVERCROWDING_THRESHOLD = Farol_Variables.OVERCROWDING_THRESHOLD;
 const AMOUNT_OF_PEOPLE = Farol_Variables.AMOUNT_OF_PEOPLE;
@@ -94,13 +95,24 @@ class Farol_Agent {
     }
 
     add_score(day_nr) {
+        let rating;
+        let overcrowded = isOvercrowded(day_nr);
         if (this.is_attending) {
-            this.score = isOvercrowded(day_nr) ? this.score - 1 : this.score + 1;
+            if (overcrowded) {
+                this.score = this.score - 1; 
+                rating = "bad";
+            } else {
+                this.score = this.score + 1;
+                rating = "good";
+            }
         }
         // TODO: add more score if prediction is close to actual attendance?
         let error = this.get_error_value(day_nr, attendance_history);
         let addValue = error <= 1 ? (error == 0 ? 1.25 : 1.5) : error;
         this.score += 1/2 * 1/addValue;
+        if(this.is_person){
+            playSuitableSound(rating, isClose(error));
+        }
     }
 
     get_error_value(day_nr) {
@@ -177,8 +189,12 @@ function isOvercrowded(day_nr) {
     return attendance_history[day_nr] > OVERCROWDING_THRESHOLD;
 }
 
-function isClose(prediction, attendance) {
-    return (prediction == (attendance + CLOSE_CALL_EPSILON) || prediction == (attendance - CLOSE_CALL_EPSILON));
+// function isClose(prediction, attendance) {
+//     return (prediction == (attendance + CLOSE_CALL_EPSILON) || prediction == (attendance - CLOSE_CALL_EPSILON));
+// }
+
+function isClose(error) {
+    return error <= CLOSE_CALL_EPSILON;
 }
 
 function differenceToAttendance(prediction, attendance) {
