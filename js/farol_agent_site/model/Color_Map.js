@@ -8,9 +8,11 @@ function setupColorMap(TOTAL_DAYS) {
             colorMap[i+1] = `rgb(0%, ${100-20*Math.floor(i/3)}%, 0%)`;
             colorMap[i+2] = `rgb(0%, 0%, ${100-20*Math.floor(i/3)}%)`;
         } else {
-            colorMap[i] = `rgb(100%, ${(i*i)%100}%, ${(10*i)%100}%)`;
-            colorMap[i+1] = `rgb(${(10*i)%100}%, 100%, ${(i*i)%100}%)`;
-            colorMap[i+2] = `rgb(${(i*i)%100}%, ${(10*i)%100}%, 100%)`;
+            let square = (i*i)%100;
+            let ten = (10*i)%100;
+            colorMap[i] = `rgb(100%, ${square}%, ${ten}%)`;
+            colorMap[i+1] = `rgb(${ten}%, 100%, ${square}%)`;
+            colorMap[i+2] = `rgb(${square}%, ${ten}%, 100%)`;
         }
         i = i + 3;
     }
