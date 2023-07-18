@@ -90,6 +90,17 @@ body {
         top: 4%;
         left: 92%;
     }
+
+    .desc_img {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+    }
+
+    .desc_img > img {
+        width: fit-content;
+        height: fit-content;
+    }
 }
 
 @media (max-width: 820px) {
@@ -99,6 +110,18 @@ body {
     }
     .attendance-graph {
         width: 100%;
+    }
+
+    .desc_img {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+    }
+
+    .desc_img > img {
+        width: 80%;
+        height: 80%;
+        align-self: center;
     }
 }
 
@@ -284,6 +307,18 @@ th {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: space-evenly;
+}
+
+#player_score {
+    align-self: center;
+    position: relative;
+}
+
+#player_score_addition {
+    position: relative;
+    top: -10px;
+    /* padding-left: 2.5%; */
+    font-size: large;
 }
 
 /* #captions {

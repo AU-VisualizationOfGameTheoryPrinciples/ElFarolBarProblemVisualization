@@ -210,4 +210,22 @@ function showRanking() {
     // ranking.print();
 }
 
-export { showOvercrowded, showDayColor, showRanking, addDay, setupCanvas, setupPredefinedCanvas, setupDaysSummaryGraphCanvas, setupCanvas, drawPredictionDay, drawMultiCanvasDay, drawSummaryGraph, drawBar, drawBarDay, drawPoint, drawLine, setText, drawAttendee };
+function animateAddition(score_addition) {
+    score_addition.style.opacity = "100%";
+    let id = null;
+    const elem = score_addition;
+    let pos = 8;
+    clearInterval(id);
+    id = setInterval(frame, 30);
+    function frame() {
+        if (pos == -14) {
+            clearInterval(id);
+            score_addition.style.opacity = "0%";
+        } else {
+            pos -= 2;
+            elem.style.top = pos + "px";
+        }
+    }
+}
+
+export { showOvercrowded, showDayColor, showRanking, addDay, setupCanvas, setupPredefinedCanvas, setupDaysSummaryGraphCanvas, setupCanvas, drawPredictionDay, drawMultiCanvasDay, drawSummaryGraph, drawBar, drawBarDay, drawPoint, drawLine, setText, drawAttendee, animateAddition };

@@ -3,7 +3,7 @@ import { hideElement } from "../../util/hideScreenElements.js";
 import { showSummary } from "../../util/Summary_Util.js";
 import { Farol_Agent, isOvercrowded } from "../model/Farol_Agent.js";
 import { Farol_Variables } from "../model/Farol_Variables.js";
-import { drawBar, drawMultiCanvasDay, drawPredictionDay, drawSummaryGraph, setupCanvas, setupDaysSummaryGraphCanvas, setupPredefinedCanvas, showDayColor, showOvercrowded, showRanking } from "../view/drawResults.js";
+import { animateAddition, drawBar, drawMultiCanvasDay, drawPredictionDay, drawSummaryGraph, setupCanvas, setupDaysSummaryGraphCanvas, setupPredefinedCanvas, showDayColor, showOvercrowded, showRanking } from "../view/drawResults.js";
 
 /*
     ==================
@@ -26,6 +26,9 @@ var player_errors;
 var attendences_in_memory;
 var current_iteration;
 var prediction_button;
+var player_score;
+var last_player_score;
+var player_score_addition;
 
 var current_day;
 
@@ -54,6 +57,9 @@ if (has_player_agent) {
     attendences_in_memory = document.getElementById("mem_attendances");
     current_iteration = document.getElementById("day_nr");
     prediction_button = document.getElementById("prediction_button");
+    player_score = document.getElementById("player_score");
+    player_score_addition = document.getElementById("player_score_addition");
+    last_player_score = 0;
 }
 
 const AMOUNT_OF_PEOPLE = 100;
@@ -128,6 +134,7 @@ function simulateDays() {
             if (getValueById("prediction")) {
                 simulatePlayerPrediction();
                 showAttendancesInMemory();
+                showPlayerScore();
                 drawSummaryGraph(current_day);
                 // if (current_day >= TOTAL_DAYS) {
                 // TODO: implement stop for Days under given max value?
@@ -171,6 +178,17 @@ function showAttendancesInMemory() {
         attendancesText += attendance;
     }
     attendences_in_memory.value = attendancesText;
+}
+
+function showPlayerScore() {
+    let score = agents[Farol_Variables.player_agent_index].score;
+    score = Math.round(score*100)/100;
+    player_score.textContent = score;
+    let score_addition = Math.round((score - last_player_score)*100)/100;
+    score_addition = score_addition > 0 ? "+" + score_addition : score_addition;
+    player_score_addition.textContent = score_addition;
+    animateAddition(player_score_addition);
+    last_player_score = score;
 }
 
 function simulateDay(i) {

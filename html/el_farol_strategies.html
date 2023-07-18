@@ -29,7 +29,7 @@
             stay at home. When all agents decided, everyone checks the errors of their strategies to the actual
             attendance
             and use the strategy with the lowest error for the next prediction.</p>
-        <div>
+        <div class="desc_img">
             <img src="../img/bar_day_prediction_desc.png" alt="bar day prediction description image">
             <img src="../img/bar_day_attendance_desc.png" alt="bar day attendance description image">
             <img src="../img/all_day_predictions_desc.png" alt="all day predictions description image">
@@ -56,6 +56,11 @@
             <h2>Your predictions</h2>
             <p>Day <short id="day_nr">X</short>
             </p>
+            <div style="display: flex; flex-direction: row; padding: 1%;">
+                <h4>Your Score:</h4>
+                <short id="player_score"></short>
+                <short id="player_score_addition"></short>
+            </div>
             <div>
                 <label for="prediction">Prediction:</label>
                 <input type="number" id="prediction" name="prediction">
