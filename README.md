@@ -14,6 +14,22 @@ capacity or threshold of the bar.
 
 - explain the concept of [congestion games](https://en.wikipedia.org/wiki/Congestion_game)
 
+## Images
+
+- all day predictions description
+    - ![all day predictions description](./img/all_day_predictions_desc.png)
+
+- bar day attendance description
+    - ![bar day attendance description](./img/bar_day_attendance_desc.png)
+
+- bar day prediction description
+    - ![bar day prediction description](./img/bar_day_prediction_desc.png)
+
+- El Farol process diagramm
+    - ![El Farol process diagramm](./img/ElFarol_process_diagramm.png)
+
+- El Farol code diagramm
+    - ![El Farol code diagramm](./img/ElFarol_code_diagramm.png)
 ## Credits
 
 Sounds of Freesound.org were used on this application.
